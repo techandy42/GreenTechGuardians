@@ -1,12 +1,15 @@
 from gpt_module import clean_response, gpt_call
 from pydantic import BaseModel
+from typing import Literal
 
-class ScoreResponse(BaseModel):
-     process: str
+Levels = Literal["Easy", "Medium", "Hard", "easy", "medium", "hard"]
+
+class Response(BaseModel):
+     process: Levels
 
 json_format = """
 {
-  "process": str
+  "process_level": "Easy" or "Medium" or "Hard"
 }
 """
 
@@ -15,8 +18,8 @@ def get_processing(problem, solution):
   business_problem = f""" {problem} """
   business_solution = f""" {solution} """
   prompt = f"""
-You will be presented with a problem in the circular economy and a corresponding business solution. Given the description and based on the following evaluation criteria, assess the level of processing difficulty for the business solution. Use a scale of 'easy', 'medium', and 'hard' to rate the difficulty, where 'easy' implies a simpler breakdown process and 'hard' implies a more complex industrial process.
-Evaluation Criteria: 1) Size: Assess the difficulty of processing based on the mass of the product. (EX: extremely heavy or bulky products (Hard), light and small products (easy), washing machine (Hard), ink cartridge (Easy)) 2) Chemical Toxicity: more hazardous materials are more difficult and expensive to process (EX: Non-toxic materials like paper (Easy), Hazardous chemicals or radioactive materials (Hard), advanced smartphones and laptops (Hard)) 3) Technology Needed: Rate the processing difficulty based on the level of technology required for processing (EX: Low-tech processing like manual labor (Easy), High-tech processes involving specialized machinery (Hard))
+You will be presented with a problem in the circular economy and a corresponding business solution. Given the description and based on the following evaluation criteria, assess the level of processing difficulty for the business solution. Use a scale of 'Easy', 'Medium', and 'Hard' to rate the difficulty, where 'Easy' implies a simpler breakdown process and 'Hard' implies a more complex industrial process.
+Evaluation Criteria: 1) Size: Assess the difficulty of processing based on the mass of the product. (EX: extremely heavy or bulky products (Hard), light and small products (Easy), washing machine (Hard), ink cartridge (Easy)) 2) Chemical Toxicity: more hazardous materials are more difficult and expensive to process (EX: Non-toxic materials like paper (Easy), Hazardous chemicals or radioactive materials (Hard), advanced smartphones and laptops (Hard)) 3) Technology Needed: Rate the processing difficulty based on the level of technology required for processing (EX: Low-tech processing like manual labor (Easy), High-tech processes involving specialized machinery (Hard))
 
 Business Problem:
 
@@ -32,7 +35,7 @@ Business Solution:
 
 #   print(cleaned_response)
   
-  validated_response = ScoreResponse.model_validate_json(cleaned_response)
+  validated_response = Response.model_validate_json(cleaned_response)
 
 #   print(validated_response)
   

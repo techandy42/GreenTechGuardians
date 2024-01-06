@@ -1,7 +1,7 @@
 from gpt_module import clean_response, gpt_call
 from pydantic import BaseModel
 
-class ScoreResponse(BaseModel):
+class Response(BaseModel):
      product: str
 
 json_format = """
@@ -31,7 +31,7 @@ Business Solution:
 
 #   print(cleaned_response)
   
-  validated_response = ScoreResponse.model_validate_json(cleaned_response)
+  validated_response = Response.model_validate_json(cleaned_response)
 
 #   print(validated_response)
   

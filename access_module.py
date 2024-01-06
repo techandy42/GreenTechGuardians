@@ -1,13 +1,16 @@
 from gpt_module import clean_response, gpt_call
 from pydantic import BaseModel
 from product_module import get_product
+from typing import Literal
 
-class ScoreResponse(BaseModel):
-     access: str
+Levels = Literal["Easy", "Medium", "Hard", "easy", "medium", "hard"]
+
+class Response(BaseModel):
+     access: Levels
 
 json_format = """
 {
-  "access": str
+  "access_level": "Easy" or "Medium" or "Hard"
 }
 """
 
@@ -17,7 +20,7 @@ def get_access(problem, solution):
   business_problem = f""" {problem} """
   business_solution = f""" {solution} """
   prompt = f"""
-You will be presented with a product name in a circular economy business. Given the name of the product and based on the following evaluation criteria, assess how difficult it is to gain access to the product. Use a scale of 'easy', 'medium', and 'hard' to rate the difficulty, where 'easy' implies a simpler retrieval process and 'hard' implies a more complex and difficult retrieval process. Evaluation criteria: 1) Public participation: it is easier to retrieve a product if the public is enthusiastic to return or provide such product (EX: the public is willing to return plastic bottles in Norway (Easy)) 2) Infrastructure and accessibility: Straightforward and streamlined retrieval processes makes is easier to access the product (EX: recycling bins (Easy), washing machines (Hard), industrial equipment requiring infrastructural partnerships to retrieve (Hard), products located in remote or difficult-to-reach areas(Hard), wind turbines (Hard), products requiring specialized equipment or expertise to retrieve (Hard)) 3) Existence of secondary markets: products containing materials with higher resale value are harder to access (EX: construction equipment (Hard), carpets (Easy)).
+You will be presented with a product name in a circular economy business. Given the name of the product and based on the following evaluation criteria, assess how difficult it is to gain access to the product. Use a scale of 'Easy', 'Medium', and 'Hard' to rate the difficulty, where 'Easy' implies a simpler retrieval process and 'Hard' implies a more complex and difficult retrieval process. Evaluation criteria: 1) Public participation: it is easier to retrieve a product if the public is enthusiastic to return or provide such product (EX: the public is willing to return plastic bottles in Norway (Easy)) 2) Infrastructure and accessibility: Straightforward and streamlined retrieval processes makes is easier to access the product (EX: recycling bins (Easy), washing machines (Hard), industrial equipment requiring infrastructural partnerships to retrieve (Hard), products located in remote or difficult-to-reach areas(Hard), wind turbines (Hard), products requiring specialized equipment or expertise to retrieve (Hard)) 3) Existence of secondary markets: products containing materials with higher resale value are harder to access (EX: construction equipment (Hard), carpets (Easy)).
 
 Business Problem:
 
@@ -33,7 +36,7 @@ Business Solution:
 
 #   print(cleaned_response)
   
-  validated_response = ScoreResponse.model_validate_json(cleaned_response)
+  validated_response = Response.model_validate_json(cleaned_response)
 
 #   print(validated_response)
   
