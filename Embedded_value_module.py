@@ -64,7 +64,7 @@ def get_Embedded_Value(problem, solution):
   business_problem = f""" {problem} """
   business_solution = f""" {solution} """
   prompt = f"""
-Given the description of a business, tokenize the description to identify the main product of the company and generate the main product. Then help me to assess the product embedded value based on factors.
+Given the description of a business, tokenize the description to identify the main product of the company and generate the main product. Then help me to assess the product embedded value based on factors such as market demand (EX: if the company is in the renewable energy sector, consider the growing demand for sustainable energy sources and how the main product aligns with this trend.) Uniqueness(EX:If the company produces a cutting-edge technology, consider how it stands out from competitors and addresses specific market needs.) and Potential Growth of the product(EX: If the company is to evaluate software solutions, evaluate its adaptabilities in different industries and different area, and generate its potential trend in the near future).
 
 Business Problem:
 
