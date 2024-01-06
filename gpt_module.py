@@ -52,7 +52,7 @@ I will ask you questions and you will respond. Your response should be in JSON f
 if __name__ == "__main__":
   from pydantic import BaseModel
 
-  class ScoreResponse(BaseModel):
+  class Response(BaseModel):
     score: int
 
   json_format = """
@@ -84,6 +84,6 @@ Business Solution:
 
   print(cleaned_response)
   
-  validated_response = ScoreResponse.model_validate_json(cleaned_response)
+  validated_response = Response.model_validate_json(cleaned_response)
 
   print(validated_response)
