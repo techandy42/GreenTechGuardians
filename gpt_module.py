@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
   json_format = """
 {
-  "score": int
+  "product": str
 }
 """
   sys_msg = None
