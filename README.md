@@ -10,4 +10,5 @@ A Circular Economy business idea evaluator tool built using Gen-AI.
 - Activate the virtual environment: `source env/bin/activate` (Mac/Linux) or `.\env\Scripts\activate` (Windows)
 - Install packages: `pip install -r requirements.txt`
 - Create `.env` file in the root folder of the project
-- Add `OPENAI_API_KEY=` environment variable with your OpenAI API Key 
+- Add `OPENAI_API_KEY=` environment variable with your OpenAI API Key
+ 
