@@ -15,7 +15,7 @@ df = pd.read_json('outputs/combined_data_first_200_rows.jsonl', lines=True)
 
 # Get business IDs and cluster assignments
 vector_ids = [str(id) for id in df["id"].tolist()]
-cluster_assignment = clustering_model.labels_ 
+cluster_assignment = clustering_model.labels_
 
 fetch_results = index.fetch(ids=vector_ids)
 fetch_results = fetch_results.to_dict()['vectors']
@@ -46,3 +46,34 @@ for cluster_id in np.unique(cluster_assignment):
 
 # Display
 print(percentile_results)
+
+def get_similar_businesses_in_percentile(business_id, df, cluster_assignment, clustering_model, index):
+    fetch_result = index.fetch(ids=[str(business_id)])
+    business_embedding = fetch_result.to_dict()['vectors'][str(business_id)]['values']
+
+    # Get the cluster assignment for the business
+    business_cluster = clustering_model.predict([business_embedding])[0]
+
+    cluster_mask = (cluster_assignment == business_cluster)
+    cluster_percentiles = {
+        "embedded": np.percentile(df.loc[cluster_mask, "embedded_value"], [25, 50, 75]),
+        "access": np.percentile(df.loc[cluster_mask, "access_level"], [25, 50, 75]),
+        "processing": np.percentile(df.loc[cluster_mask, "processing_level"], [25, 50, 75])
+    }
+
+    # Find business IDs within the same percentile
+    similar_businesses = df.loc[cluster_mask, "id"].tolist()
+
+    return {
+        "business_cluster": business_cluster,
+        "cluster_percentiles": cluster_percentiles,
+        "similar_businesses": similar_businesses
+    }
+
+# Example usage:
+business_id_to_check = 6
+similar_businesses_info = get_similar_businesses_in_percentile(business_id_to_check, df, cluster_assignment, clustering_model, index)
+print("Business ID", business_id_to_check)
+print("Business Cluster:", similar_businesses_info["business_cluster"])
+print("Cluster Percentiles:", similar_businesses_info["cluster_percentiles"])
+print("Similar Businesses in Percentile:", similar_businesses_info["similar_businesses"])
