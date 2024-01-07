@@ -1,51 +1,48 @@
+from clustering_test import clustering_model
 import pandas as pd
-import openai
 import numpy as np
 from sklearn.cluster import KMeans
+from dotenv import load_dotenv
+import pinecone
+import os
 
-api_key = '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'
-openai.api_key = api_key
+load_dotenv()
+pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-gcp-free')
+index_name = 'green'
+index = pinecone.Index(index_name)
 
-target_embedded_mean = 0.5835858585858591
-target_access_mean = 0.2772727272727276
-target_processing_mean = 0.42752525252525264
+df = pd.read_json('outputs/combined_data_first_200_rows.jsonl', lines=True)
 
-df = pd.read_csv('./outputs/combined_data_first_200_rows.csv', encoding='latin-1')
-solutions = list(df['solution'])
-embedded_values = list(df['embedded_value'])
-access_levels = list(df['access_level'])
-processing_levels = list(df['processing_level'])
+# Get business IDs and cluster assignments
+vector_ids = [str(id) for id in df["id"].tolist()]
+cluster_assignment = clustering_model.labels_ 
 
-cluster_stats = {}
+fetch_results = index.fetch(ids=vector_ids)
+fetch_results = fetch_results.to_dict()['vectors']
+embeddings = [fetch_results[str(id)]['values'] for id in df["id"].tolist()]
 
-response = openai.Embedding.create(
-    input=solutions[:200],  
-    model="text-similarity-babbage-001"
-)
-solutions_embeddings = [d['embedding'] for d in response['data']]
-solutions_embeddings = solutions_embeddings / np.linalg.norm(solutions_embeddings, axis=1, keepdims=True)
+# Calculate percentiles within each cluster
+percentile_results = {}
 
-
-clustering_model = KMeans(n_clusters=8)
-clustering_model.fit(solutions_embeddings)
-cluster_assignment = clustering_model.labels_
-
-for c in range(clustering_model.n_clusters):
-    cluster_mask = (cluster_assignment == c)
-    cluster_stats[c] = {
-        "embedded_values": np.mean(np.array(embedded_values)[cluster_mask]),
-        "access_levels": np.mean(np.array(access_levels)[cluster_mask]),
-        "processing_levels": np.mean(np.array(processing_levels)[cluster_mask]),
+for cluster_id in np.unique(cluster_assignment):
+    cluster_mask = (cluster_assignment == cluster_id)
+    
+    cluster_business_ids = df.loc[cluster_mask, "id"].tolist()
+    cluster_embedded_values = df.loc[cluster_mask, "embedded_value"].tolist()
+    cluster_access_levels = df.loc[cluster_mask, "access_level"].tolist()
+    cluster_processing_levels = df.loc[cluster_mask, "processing_level"].tolist()
+    
+    cluster_embedded_percentiles = np.percentile(cluster_embedded_values, [25, 50, 75])
+    cluster_access_percentiles = np.percentile(cluster_access_levels, [25, 50, 75])
+    cluster_processing_percentiles = np.percentile(cluster_processing_levels, [25, 50, 75])
+    
+    # Store results in a dictionary
+    percentile_results[cluster_id] = {
+        "embedded_percentiles": cluster_embedded_percentiles,
+        "access_percentiles": cluster_access_percentiles,
+        "processing_percentiles": cluster_processing_percentiles,
+        "business_ids": cluster_business_ids
     }
 
-target_business_cluster = clustering_model.predict([[target_embedded_mean, target_access_mean, target_processing_mean]])[0]
-
-target_cluster_stats = cluster_stats[target_business_cluster]
-
-target_embedded_percentile = np.percentile(np.array(embedded_values), [25, 50, 75])
-target_access_percentile = np.percentile(np.array(access_levels), [25, 50, 75])
-target_processing_percentile = np.percentile(np.array(processing_levels), [25, 50, 75])
-
-print("Embedded Value Percentiles:", target_embedded_percentile)
-print("Access Level Percentiles:", target_access_percentile)
-print("Processing Level Percentiles:", target_processing_percentile)
+# Display
+print(percentile_results)
