@@ -71,4 +71,29 @@ for idx in range(len(solutions)):
 
 # gives an overall score based on the average of individual scores
 scores_overall = {}
-scorer(scores_overall, avg_scores, True)
+for idx in range(len(solutions)):
+    var = avg_scores[idx+1]
+    if var <= 0.3:
+        scores_overall[idx+1] = 1
+    elif var <= 0.6:
+        scores_overall[idx+1] = 2
+    elif var <= 0.9:
+        scores_overall[idx+1] = 3
+    elif var <= 1.2:
+        scores_overall[idx+1] = 4
+    elif var <= 1.5:
+        scores_overall[idx+1] = 5
+    elif var <= 1.8:
+        scores_overall[idx+1] = 6
+    elif var <= 2.1:
+        scores_overall[idx+1] = 7
+    elif var <= 2.4:
+        scores_overall[idx+1] = 8
+    elif var <= 2.7:
+        scores_overall[idx+1] = 9
+    elif var <= 3.0:
+        scores_overall[idx+1] = 10
+
+
+# Using percentiles to score: split by 10s 
+# Every 10th percentile increments score by 1

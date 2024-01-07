@@ -2,6 +2,7 @@ import pandas as pd
 from openai.embeddings_utils import get_embedding, cosine_similarity
 from diffusers import StableDiffusionPipeline
 import torch
+from PIL import Image
 
 df = pd.read_csv('./outputs/combined_data_first_200_rows.csv', encoding='latin-1')
 prompts = list(df['product'])
