@@ -1,5 +1,5 @@
 import pandas as pd
-from Comparing_similarities import get_percentiles_for_business
+from comparing_similarities import get_percentiles_for_business
 
 from clustering_test import clustering_model
 import pandas as pd

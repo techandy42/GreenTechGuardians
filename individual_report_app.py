@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from circular_matrix import plot_matrix, get_suggestion
 from clustering_test import cluster_assignment, clusters
-from Comparing_similarities import get_percentiles_for_business
+from comparing_similarities import get_percentiles_for_business
 from clustering_test import clustering_model
 from dotenv import load_dotenv
 import pinecone
@@ -11,6 +11,7 @@ from processing_reasoning_module import get_processing_reason
 from access_reasoning_module import get_access_reason
 from embedded_value_reasoning_module import get_embedded_value_reason
 from categories_reasoning_module import get_category_reason
+from solution_rating import percentile_score
 
 load_dotenv()
 pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-gcp-free')
@@ -39,6 +40,7 @@ def report(id):
      st.write(business['summary'])
      with st.expander("More Detailed Description"):
           st.write(business['solution'])
+     st.subheader(f"Overall Solution Score: {percentile_score[id+1]}")
      # columns = st.columns(3)
      percentiles = get_percentiles_for_business(id, df, cluster_assignment, clustering_model, index)
      st.subheader("Processing Level")
