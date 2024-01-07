@@ -1,7 +1,18 @@
 import pandas as pd
+from Comparing_similarities import get_percentiles_for_business
+
+from clustering_test import clustering_model
+import pandas as pd
+import numpy as np
+from sklearn.cluster import KMeans
+from dotenv import load_dotenv
+import pinecone
+import os
+from scipy.stats import percentileofscore
 
 df = pd.read_csv('./outputs/combined_data_first_200_rows.csv', encoding='latin-1')
 solutions = list(df['solution'])
+ids = list(df['id'])
 embedded_values = list(df['embedded_value'])
 access_levels = list(df['access_level'])
 processing_levels = list(df['processing_level'])
@@ -94,6 +105,16 @@ for idx in range(len(solutions)):
     elif var <= 3.0:
         scores_overall[idx+1] = 10
 
-
 # Using percentiles to score: split by 10s 
 # Every 10th percentile increments score by 1
+vector_ids = [str(id) for id in df["id"].tolist()]
+cluster_assignment = clustering_model.labels_
+load_dotenv()
+pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-gcp-free')
+index_name = 'green'
+index = pinecone.Index(index_name)
+
+percentile_score = {}
+for id in ids:
+    percentile = get_percentiles_for_business(id, df, cluster_assignment, clustering_model, index)
+    percentile_score[id+1] = (int(percentile["business_embedded_percentile"] / 10)) + 1
