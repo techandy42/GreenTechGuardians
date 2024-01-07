@@ -40,7 +40,7 @@ def report(id):
      st.write(business['summary'])
      with st.expander("More Detailed Description"):
           st.write(business['solution'])
-     st.subheader(f"Overall Solution Score: {percentile_score[id+1]}")
+     st.subheader(f"Overall Solution Score: {percentile_score[id+1]}/10")
      # columns = st.columns(3)
      percentiles = get_percentiles_for_business(id, df, cluster_assignment, clustering_model, index)
      st.subheader("Processing Level")
