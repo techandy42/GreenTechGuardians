@@ -11,14 +11,13 @@ json_format = """
 def get_access_reason(problem, solution, access_level):
      business_problem = f""" {problem} """
      business_solution = f""" {solution} """
-     prompt = f"""Given the following business problem in circular economy, a corresponding business solution, and rating for processing level, explain in 25 words why the solution
-     would have received that rating for processing level. The rating was given by the following criteria: 
-     Based on the following evaluation criteria, assess the level of processing difficulty for the business solution. 
-     Use a scale of 0-1 to rate the difficulty, where closer to 0 (easy) implies a simpler breakdown process and closer to 1 (hard) implies a more complex industrial process.
-     Evaluation Criteria: 
-     1) Size: Assess the difficulty of processing based on the mass of the product. (EX: extremely heavy or bulky products (hard, closer to 1), light and small products (easy, closer to 0), washing machine (hard, closer to 1), ink cartridge (easy, closer to 0)) 
-     2) Chemical Toxicity: more hazardous materials are more difficult and expensive to process (EX: Non-toxic materials like paper (easy, closer to 0), Hazardous chemicals or radioactive materials (hard, closer to 1), advanced smartphones and laptops (hard, closer to 1)) 
-     3) Technology Needed: Rate the processing difficulty based on the level of technology required for processing (EX: Low-tech processing like manual labor (easy, closer to 0), High-tech processes involving specialized machinery (hard, closer to 1)).
+     prompt = f"""Given the following business problem in a circular economy, a corresponding business solution, and rating for access level, explain in 25 words why the solution would have received that rating for access level. The rating was given by the following criteria:
+Based on the following evaluation criteria, assess how difficult it is to gain access to the product. Use a scale between 0 to 1 to rate the difficulty, where closer to 0 (easy) implies a simpler retrieval process and closer to 1 (hard) implies a more complex and difficult retrieval process.
+Evaluation criteria:
+1) Public participation: it is easier to retrieve a product if the public is enthusiastic to return or provide such product
+(EX: if the product is water bottle recycling in Norway, and if Norwegian citizens are more willing to recycle water bottles, then the score will lean closer to 0)
+2) Infrastructure and accessibility: Straightforward and streamlined retrieval processes makes is easier to access the product
+(EX: recycling bins (easy, closer to 0), washing machines (hard, closer to 1), industrial equipment requiring infrastructural partnerships to retrieve (hard, closer to 1), products located in remote or difficult-to-reach areas (hard, closer to 1), wind turbines (hard, closer to 1), products requiring specialized equipment or expertise to retrieve (hard, closer to 1)) 3) Existence of secondary markets: products containing materials with higher resale value are harder to access (EX: construction equipment (hard, closer to 1), carpets (easy, closer to 0)).
 
      Business Problem:
 
