@@ -6,6 +6,7 @@ import streamlit as st
 import pandas as pd
 from individual_report_app import report
 from data_visualization_app import scatter_results_3d
+from chatbot_module import Conversation
 
 load_dotenv()
 
@@ -69,7 +70,46 @@ elif st.session_state.view_state == 'report':
     if st.button("Go Back To Search"):
         go_back()  # Go back to search view
     report(st.session_state.selected_item_id)
-    similar_results_df = search_index(df[df['id']==st.session_state.selected_item_id].iloc[0]['summary'], index)
+    current_item = df[df['id']==st.session_state.selected_item_id].iloc[0]
+    similar_results_df = search_index(current_item['summary'], index)
+
+    # Chatbot Interface
+    st.subheader("Ask ChatBot Advisor")
+    background_info = f"""
+The above are conversation history between a user and a chatbot. Reference the conversation history to answer the user's question.
+
+Use the following information about a circular economy business below to answer the user's question.
+
+Product Name: {current_item['product']}
+
+Product Summary: {current_item['summary']}
+
+Business Problem: {current_item['problem']}
+
+Business Solution: {current_item['solution']}
+"""
+    conversation = Conversation(background_info)
+
+    # Initialize or update chat history
+    if 'chat_history' not in st.session_state:
+        st.session_state.chat_history = []
+
+    # User input for the chatbot
+    user_question = st.text_input("Your question to the ChatBot:", key="user_question")
+
+    # Button to submit the question
+    if st.button("Ask ChatBot"):
+        if user_question:
+            # Processing the question with the chatbot
+            response = conversation.ask_question(user_question)
+            # Updating the chat history
+            st.session_state.chat_history.append("User: " + user_question)
+            st.session_state.chat_history.append("ChatBot: " + response)
+
+    # Display the conversation history
+    for index, chat in enumerate(st.session_state.chat_history):
+        st.text_area("Chat:", key=index, value=chat, height=100, disabled=True)
+
     st.subheader("Similar Businesses")
     for _, row in similar_results_df.iterrows():
         if st.button(f"ID: {row['id']}, Product: {row['product']}, Summary: {row['summary']}, Categories: {', '.join(row['categories'])}"):

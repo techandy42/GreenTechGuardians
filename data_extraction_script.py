@@ -18,7 +18,9 @@ with open(f'extracted_data_row_{start_idx}_to_{end_idx}.jsonl', 'w') as file:
         "embedded_value": embedded_value,
         "access_level": access_level,
         "processing_level": processing_level,
-        "categories": categories
+        "categories": categories,
+        "problem": row['problem'],
+        "solution": row['solution'],
       }
       json_data = json.dumps(data)
       file.write(json_data)
