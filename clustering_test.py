@@ -13,8 +13,9 @@ openai.api_key = api_key
 # source: https://stackoverflow.com/questions/55619176/how-to-cluster-similar-sentences-using-bert
 from sklearn.cluster import KMeans
 
-df = pd.read_csv('AI_EarthHack_Dataset.csv', encoding='latin-1')
+df = pd.read_csv('./outputs/combined_data_first_200_rows.csv', encoding='latin-1')
 solutions = list(df['solution'])
+embedded_values = list(df['embedded_value'])
 print(solutions[0])
 
 
@@ -55,6 +56,15 @@ for sentence_id, cluster_id in enumerate(cluster_assignment):
         clustered_sentences[cluster_id] = []
     clustered_sentences[cluster_id].append(solutions[sentence_id])
 print(clustered_sentences[1][:3])
-    
+
+clusters = {}
+for i in range(len(cluster_assignment)):
+    if cluster_assignment[i] in clusters:
+        clusters[cluster_assignment[i]].append(i+1)
+    else:
+        clusters[cluster_assignment[i]] = [i+1]
+
+for c in clusters:
+
 
 
