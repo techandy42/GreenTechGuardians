@@ -7,6 +7,7 @@ from clustering_test import clustering_model
 from dotenv import load_dotenv
 import pinecone
 import os
+from processing_reasoning_module import get_processing_reason
 
 load_dotenv()
 pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-gcp-free')
@@ -24,30 +25,33 @@ strat_full_names = {"RPO": "RPO (Retain Product Ownership)",
                     "DFR": "DFR (Design for Recycling)",
                     "PLE": "PLE (Product Life Extension)",
                     "PARTNERSHIP": "PARTNERSHIP"}
+
+
 def report(id):
      business = df[df['id']==id].iloc[0]
      st.title(business['product'])
      st.header("Problem Statement")
      st.write(business['problem'])
-     # print(business.loc[0]['product'])
      st.header("Solution")
      st.write(business['summary'])
      with st.expander("More Detailed Description"):
           st.write(business['solution'])
-     columns = st.columns(3)
+     # columns = st.columns(3)
      percentiles = get_percentiles_for_business(id, df, cluster_assignment, clustering_model, index)
-     columns[0].subheader("Processing Level")
-     columns[0].write(f"How hard is it to process the relevant materials for this {business['product']}?")
-     columns[0].write(round(business['processing_level'],2))
-     columns[0].write(f"This business is at the {round(percentiles['business_processing_percentile'],2)}th percentile of similar businesses")
-     columns[1].subheader("Access Level")
-     columns[1].write(f"How hard is it to retrieve the relevant materials for this {business['product']}?")
-     columns[1].write(round(business['access_level'],2))
-     columns[1].write(f"This business is at the {round(percentiles['business_access_percentile'],2)}th percentile of similar businesses")
-     columns[2].subheader("Embedded Value Rating")
-     columns[2].write(f"How much value do the relevant materials contain for {business['product']}?")
-     columns[2].write(round(business['embedded_value'],2))
-     columns[2].write(f"This business is at the {round(percentiles['business_embedded_percentile'],2)}th percentile of similar businesses")
+     st.subheader("Processing Level")
+     st.write(f"How hard is it to process the relevant materials for this {business['product']}?")
+     st.write(round(business['processing_level'],2))
+     st.write(f"This business is at the {round(percentiles['business_processing_percentile'],2)}th percentile of similar businesses")
+     with st.expander("See reasoning"):
+          st.write((get_processing_reason(business['problem'], business['solution'], business['processing_level']).processing_reasoning))
+     st.subheader("Access Level")
+     st.write(f"How hard is it to retrieve the relevant materials for this {business['product']}?")
+     st.write(round(business['access_level'],2))
+     st.write(f"This business is at the {round(percentiles['business_access_percentile'],2)}th percentile of similar businesses")
+     st.subheader("Embedded Value Rating")
+     st.write(f"How much value do the relevant materials contain for {business['product']}?")
+     st.write(round(business['embedded_value'],2))
+     st.write(f"This business is at the {round(percentiles['business_embedded_percentile'],2)}th percentile of similar businesses")
      st.subheader("Business Strategies Deployed:")
      for c in business['categories']:
           with st.expander(strat_full_names[c]):
