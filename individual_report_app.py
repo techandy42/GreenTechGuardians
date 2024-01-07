@@ -3,14 +3,13 @@ import pandas as pd
 from circular_matrix import plot_matrix, get_suggestion
 from clustering_test import cluster_assignment, clusters
 df = pd.read_json('outputs/combined_data_first_200_rows.jsonl', lines=True)
-print(df)
 strat_descriptions = {"RPO":"(retain product ownership) Producer rents or leases rather than selling",
                       "DFR":"(design for recycling)",
                       "PLE": "(product life extension)",
                       "PARTNERSHIP": "Partnering with specific technological expertise or institutional organization"
                       }
 def report(id):
-     business = df[df['id']==id].loc[0]
+     business = df[df['id']==id].iloc[0]
      st.title(business['product'])
      st.header("Problem Statement")
      st.write(business['problem'])
