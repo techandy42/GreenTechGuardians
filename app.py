@@ -61,6 +61,11 @@ if st.session_state.view_state == 'search':
 elif st.session_state.view_state == 'report':
     # Clear the previous items and show the report
     st.empty()
-    if st.button("Go Back"):
+    if st.button("Go Back To Search"):
         go_back()  # Go back to search view
     report(st.session_state.selected_item_id)
+    similar_results_df = search_index(df[df['id']==st.session_state.selected_item_id].iloc[0]['summary'], index)
+    st.subheader("Similar Businesses")
+    for _, row in similar_results_df.iterrows():
+        if st.button(f"ID: {row['id']}, Product: {row['product']}, Summary: {row['summary']}, Categories: {', '.join(row['categories'])}"):
+            view_report(row['id'])  # Update state and view report
