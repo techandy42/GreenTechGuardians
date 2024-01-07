@@ -12,6 +12,7 @@ from scipy.stats import percentileofscore
 
 df = pd.read_csv('./outputs/combined_data_first_200_rows.csv', encoding='latin-1')
 solutions = list(df['solution'])
+ids = list(df['id'])
 embedded_values = list(df['embedded_value'])
 access_levels = list(df['access_level'])
 processing_levels = list(df['processing_level'])
@@ -114,6 +115,6 @@ index_name = 'green'
 index = pinecone.Index(index_name)
 
 percentile_score = {}
-for id in range(len(solutions)):
-    percentile = get_percentiles_for_business(id+1, df, cluster_assignment, clustering_model, index)
-    percentile_score[id+1] = (percentile // 10) + 1
+for id in ids:
+    percentile = get_percentiles_for_business(id, df, cluster_assignment, clustering_model, index)
+    percentile_score[id+1] = (int(percentile["business_embedded_percentile"] / 10)) + 1
