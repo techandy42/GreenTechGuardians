@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from openai.embeddings_utils import get_embedding, cosine_similarity
 
 import os
 from dotenv import load_dotenv
