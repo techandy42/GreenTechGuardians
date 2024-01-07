@@ -63,10 +63,10 @@ import matplotlib.cm as cm
 # plt.show()
 
 import plotly.express as px
-df = pd.DataFrame({'processing_level':[0.1, 0.2, 0.3, 0.5, 0.1, 0.9], 'access_level':[0.4, 0.5, 0.7, 0.1, 0.9, 0.3], 
-                   'categories': ['a','b','c','b','e','a']})
+# df = pd.DataFrame({'processing_level':[0.1, 0.2, 0.3, 0.5, 0.1, 0.9], 'access_level':[0.4, 0.5, 0.7, 0.1, 0.9, 0.3], 
+#                    'categories': ['a','b','c','b','e','a']})
 def plot_matrix(df, this_processing, this_access):
-     fig = px.scatter(df,x = 'processing_level', y = 'access_level',hover_data=['categories'],  width=400, height=400)
+     fig = px.scatter(df,x = 'processing_level', y = 'access_level',hover_data=['categories'],  width=500, height=500)
      fig.add_scatter(x=[this_processing],
                     y=[this_access],
                     marker=dict(
