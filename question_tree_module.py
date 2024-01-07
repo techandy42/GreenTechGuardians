@@ -1,6 +1,6 @@
 from product_module import get_product
 from summary_module import get_summary
-from embedded_value_module import get_embedded_value
+from Embedded_value_module import get_embedded_value
 from access_module import get_access_level
 from processing_module import get_processing_level
 from categories_module import get_categories
