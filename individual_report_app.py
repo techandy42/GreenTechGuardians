@@ -68,4 +68,6 @@ def report(id):
           else:
                with st.expander(f"{c}: Not yet deployed"):
                     st.write(strat_descriptions[c])
-report(1)
+
+if __name__ == "__main__":
+     report(1)
