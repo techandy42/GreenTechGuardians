@@ -1,9 +1,4 @@
 import pandas as pd
-import openai, numpy as np
-from openai.embeddings_utils import get_embedding, cosine_similarity
-
-api_key = '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'
-openai.api_key = api_key
 
 df = pd.read_csv('./outputs/combined_data_first_200_rows.csv', encoding='latin-1')
 solutions = list(df['solution'])
@@ -72,7 +67,7 @@ scorer(scores_pr, processing_levels, False)
 # make new dict with avg scores from each scores dict above
 avg_scores = {}
 for idx in range(len(solutions)):
-    avg_scores[idx+1] = sum(scores_em[idx+1], scores_ac[idx+1], scores_pr[idx+1]) / 3
+    avg_scores[idx+1] = (scores_em[idx+1] + scores_ac[idx+1] + scores_pr[idx+1]) / 3
 
 # gives an overall score based on the average of individual scores
 scores_overall = {}

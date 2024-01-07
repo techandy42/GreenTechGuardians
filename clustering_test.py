@@ -1,63 +1,42 @@
 import pandas as pd
-import openai, numpy as np
+import numpy as np
 from openai.embeddings_utils import get_embedding, cosine_similarity
 
-api_key = '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'
-openai.api_key = api_key
+import os
+from dotenv import load_dotenv
+import pinecone
+load_dotenv()
+pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-gcp-free')
+index_name = 'green'
+index = pinecone.Index(index_name)
 
-# resp = openai.Embedding.create(
-#     input=["eating food", "I am hungry", "I am traveling" , "exploring new places"],
-#     engine="text-similarity-davinci-001")
-# resp['data'][0].keys()
+import pandas as pd
+df = pd.read_json('outputs/combined_data_first_200_rows.jsonl', lines=True)
+vector_ids = [str(id) for id in df["id"].tolist()]
+# Fetch embeddings
+fetch_results = index.fetch(ids=vector_ids)
+fetch_results = fetch_results.to_dict()['vectors']
+embeddings = [fetch_results[str(id)]['values'] for id in df["id"].tolist()]
 
-# source: https://stackoverflow.com/questions/55619176/how-to-cluster-similar-sentences-using-bert
 from sklearn.cluster import KMeans
 
-df = pd.read_csv('./outputs/combined_data_first_200_rows.csv', encoding='latin-1')
-solutions = list(df['solution'])
+# solutions = list(df['solution'])
 embedded_values = list(df['embedded_value'])
 access_levels = list(df['access_level'])
 processing_levels = list(df['processing_level'])
-print(solutions[0])
 
-
-# # Corpus with example sentences
-# corpus = ['A man is eating food.',
-#           'A man is eating a piece of bread.',
-#           'Horse is eating grass.',
-#           'A man is eating pasta.',
-#           'A Woman is eating Biryani.',
-#           'The girl is carrying a baby.',
-#           'The baby is carried by the woman',
-#           'A man is riding a horse.',
-#           'A man is riding a white horse on an enclosed ground.',
-#           'A monkey is playing drums.',
-#           'Someone in a gorilla costume is playing a set of drums.',
-#           'A cheetah is running behind its prey.',
-#           'A cheetah chases prey on across a field.',
-#           'The cheetah is chasing a man who is riding the horse.',
-#           'man and women with their baby are watching cheetah in zoo'
-#           ]
-response = openai.Embedding.create(
-    input=solutions[:800],
-    model="text-similarity-babbage-001"
-)
-print(type(response['data']))
-
-solutions_embeddings = [ d['embedding'] for d in response['data']]
-# # Normalize the embeddings to unit length
-solutions_embeddings = solutions_embeddings /  np.linalg.norm(solutions_embeddings, axis=1, keepdims=True)
-clustering_model = KMeans(n_clusters=8)
-clustering_model.fit(solutions_embeddings)
+# # # Normalize the embeddings to unit length
+embeddings = embeddings /  np.linalg.norm(embeddings, axis=1, keepdims=True)
+clustering_model = KMeans(n_clusters=20)
+clustering_model.fit(embeddings)
 cluster_assignment = clustering_model.labels_
 print(cluster_assignment)
 
-clustered_sentences = {}
-for sentence_id, cluster_id in enumerate(cluster_assignment):
-    if cluster_id not in clustered_sentences:
-        clustered_sentences[cluster_id] = []
-    clustered_sentences[cluster_id].append(solutions[sentence_id])
-print(clustered_sentences[1][:3])
+# clustered_sentences = {}
+# for sentence_id, cluster_id in enumerate(cluster_assignment):
+#     if cluster_id not in clustered_sentences:
+#         clustered_sentences[cluster_id] = []
+#     clustered_sentences[cluster_id].append(sentence_id)
 
 clusters = {}
 for i in range(len(cluster_assignment)):
@@ -65,12 +44,30 @@ for i in range(len(cluster_assignment)):
         clusters[cluster_assignment[i]].append(i+1)
     else:
         clusters[cluster_assignment[i]] = [i+1]
+print(clusters)
 
 cluster_stats = {}
 for c in clusters:
     cluster_stats[c] = {}
-    cluster_stats[c]["embedded_values"] = [sum(embedded_values)/len(embedded_values),]
-    cluster_stats[c]["access_levels"] = [sum(access_levels)/len(access_levels),]
-    cluster_stats[c]["processing_levels"] = [sum(processing_levels)/len(processing_levels),]
+    embedded_sum = 0
+    access_sum = 0
+    processing_sum = 0
+    for id in clusters[c]:
+        embedded_sum += embedded_values[id-1]
+        access_sum += access_levels[id-1]
+        processing_sum += processing_levels[id-1]
+    cluster_stats[c]["embedded_values"] = [embedded_sum/len(clusters[c])]
+    cluster_stats[c]["access_levels"] = [access_sum/len(clusters[c])]
+    cluster_stats[c]["processing_levels"] = [processing_sum/len(clusters[c])]
+
+print("cluster stats: ")
+print(cluster_stats)
+print("total stats:")
+print("embedded values mean:")
+print(sum(embedded_values)/len(embedded_values))
+print("access level mean:")
+print(sum(access_levels)/len(access_levels))
+print("processing level mean:")
+print(sum(processing_levels)/len(processing_levels))
     
 
