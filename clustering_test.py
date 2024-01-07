@@ -26,7 +26,7 @@ processing_levels = list(df['processing_level'])
 
 # # # Normalize the embeddings to unit length
 embeddings = embeddings /  np.linalg.norm(embeddings, axis=1, keepdims=True)
-clustering_model = KMeans(n_clusters=20)
+clustering_model = KMeans(n_clusters=10)
 clustering_model.fit(embeddings)
 cluster_assignment = clustering_model.labels_
 print(cluster_assignment)

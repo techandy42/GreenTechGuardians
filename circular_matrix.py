@@ -74,8 +74,11 @@ def plot_matrix(df, this_processing, this_access):
                          size=10
                     ),
                     name='this business')
+     
      fig.add_hline(y=0.5, line_color = "white")
      fig.add_vline(x=0.5, line_color = "white")
+     fig.update_layout(yaxis_range=[0,1])
+     fig.update_layout(xaxis_range=[0,1])
      fig.update_traces(line_color='#ffffff', line_width=5)
      fig.update_xaxes(linewidth=1, linecolor='white', mirror=True, ticks='inside', 
      showline=True)
@@ -84,3 +87,27 @@ def plot_matrix(df, this_processing, this_access):
      # fig.show()
      return fig
 # st.write(plot_matrix(df, 0.2, 0.8))
+
+def get_suggestion(processing_level, access_level, embedded_value):
+     if processing_level > 0.5 and access_level > 0.5:
+          if embedded_value > 0.5:
+               return ["PLE"]
+          else:
+               return ["DFR", "RPO"]
+     elif processing_level > 0.5 and access_level <= 0.5:
+          if embedded_value > 0.5:
+               return ["DFR"]
+          else:
+               return ["DFR", "PARTNERSHIP"]
+     elif processing_level <= 0.5 and access_level > 0.5:
+          if embedded_value > 0.5:
+               return ["PLE", "RPO"]
+          else:
+               return ["DFR", "PARTNERSHIP"]
+     else:
+          if embedded_value > 0.5:
+               return ["PLE", "DFR"]
+          else:
+               return ["DFR"]
+
+     
