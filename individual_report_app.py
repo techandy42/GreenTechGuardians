@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 import pinecone
 import os
 from processing_reasoning_module import get_processing_reason
+from access_reasoning_module import get_access_reason
+from embedded_value_reasoning_module import get_embedded_value_reason
+from categories_reasoning_module import get_category_reason
 
 load_dotenv()
 pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-gcp-free')
@@ -48,14 +51,20 @@ def report(id):
      st.write(f"How hard is it to retrieve the relevant materials for this {business['product']}?")
      st.write(round(business['access_level'],2))
      st.write(f"This business is at the {round(percentiles['business_access_percentile'],2)}th percentile of similar businesses")
+     with st.expander("See reasoning"):
+          st.write((get_access_reason(business['problem'], business['solution'], business['access_level']).access_reasoning))
      st.subheader("Embedded Value Rating")
      st.write(f"How much value do the relevant materials contain for {business['product']}?")
      st.write(round(business['embedded_value'],2))
      st.write(f"This business is at the {round(percentiles['business_embedded_percentile'],2)}th percentile of similar businesses")
+     with st.expander("See reasoning"):
+          st.write((get_embedded_value_reason(business['problem'], business['solution'], business['embedded_value'],business['product']).embedded_value_reasoning))
      st.subheader("Business Strategies Deployed:")
      for c in business['categories']:
           with st.expander(strat_full_names[c]):
                st.write(strat_descriptions[c])
+               st.write("Reasoning:")
+               st.write((get_category_reason(business['problem'], business['solution'], c).category_reasoning))
      st.subheader(f"How does the {business['product']} business compare with similar businesses in the Circular Economy? - The Circular Matrix")
      similar_businesses = df[df['id'].isin(clusters[cluster_assignment[id]])]
      st.write(plot_matrix(similar_businesses, business['processing_level'], business['access_level']))
@@ -68,6 +77,7 @@ def report(id):
           else:
                with st.expander(f"{c}: Not yet deployed"):
                     st.write(strat_descriptions[c])
+
 
 if __name__ == "__main__":
      report(1)
