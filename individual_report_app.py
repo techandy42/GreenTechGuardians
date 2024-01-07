@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from circular_matrix import plot_matrix, get_suggestion
 from clustering_test import cluster_assignment, clusters
-from Comparing_similarities import get_percentiles_for_business
+from comparing_similarities import get_percentiles_for_business
 from clustering_test import clustering_model
 from dotenv import load_dotenv
 import pinecone

@@ -5,6 +5,7 @@ from openai import OpenAI
 import streamlit as st
 import pandas as pd
 from individual_report_app import report
+from data_visualization_app import scatter_results_3d
 
 load_dotenv()
 
@@ -57,6 +58,10 @@ if st.session_state.view_state == 'search':
         for _, row in results_df.iterrows():
             if st.button(f"ID: {row['id']}, Product: {row['product']}, Summary: {row['summary']}, Categories: {', '.join(row['categories'])}"):
                 view_report(row['id'])  # Update state and view report
+        x_data = results_df['embedded_value'].tolist()
+        y_data = results_df['processing_level'].tolist()
+        z_data = results_df['access_level'].tolist()
+        scatter_results_3d(x_data, y_data, z_data, query)
 
 elif st.session_state.view_state == 'report':
     # Clear the previous items and show the report
