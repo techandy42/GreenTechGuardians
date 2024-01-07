@@ -1,14 +1,7 @@
 import pandas as pd
-import openai, numpy as np
 from openai.embeddings_utils import get_embedding, cosine_similarity
 from diffusers import StableDiffusionPipeline
 import torch
-
-api_key = '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'
-openai.api_key = api_key
-
-# source: https://stackoverflow.com/questions/55619176/how-to-cluster-similar-sentences-using-bert
-from sklearn.cluster import KMeans
 
 df = pd.read_csv('./outputs/combined_data_first_200_rows.csv', encoding='latin-1')
 prompts = list(df['product'])
