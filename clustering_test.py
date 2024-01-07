@@ -16,6 +16,8 @@ from sklearn.cluster import KMeans
 df = pd.read_csv('./outputs/combined_data_first_200_rows.csv', encoding='latin-1')
 solutions = list(df['solution'])
 embedded_values = list(df['embedded_value'])
+access_levels = list(df['access_level'])
+processing_levels = list(df['processing_level'])
 print(solutions[0])
 
 
@@ -64,7 +66,11 @@ for i in range(len(cluster_assignment)):
     else:
         clusters[cluster_assignment[i]] = [i+1]
 
+cluster_stats = {}
 for c in clusters:
-
-
+    cluster_stats[c] = {}
+    cluster_stats[c]["embedded_values"] = [sum(embedded_values)/len(embedded_values),]
+    cluster_stats[c]["access_levels"] = [sum(access_levels)/len(access_levels),]
+    cluster_stats[c]["processing_levels"] = [sum(processing_levels)/len(processing_levels),]
+    
 
