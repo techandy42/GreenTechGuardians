@@ -6,6 +6,7 @@ import streamlit as st
 import pandas as pd
 from individual_report_app import report
 from data_visualization_app import scatter_results_3d
+from chatbot_module import Conversation
 
 load_dotenv()
 
@@ -44,10 +45,22 @@ def view_report(item_id):
     st.session_state.selected_item_id = item_id
     st.experimental_rerun()
 
-def go_back():
+def chat(item_id):
+    st.session_state.view_state = 'chat'
+    st.session_state.selected_item_id = item_id
+    st.experimental_rerun()
+
+def go_back_to_search():
     # Function to go back to the search view
     st.session_state.view_state = 'search'
     st.experimental_rerun()
+
+def go_back_to_report(item_id):
+    # Function to go back to the report view
+    st.session_state.view_state = 'report'
+    st.session_state.selected_item_id = item_id
+    st.experimental_rerun()
+
 # Main App
 
 if st.session_state.view_state == 'search':
@@ -67,10 +80,56 @@ elif st.session_state.view_state == 'report':
     # Clear the previous items and show the report
     st.empty()
     if st.button("Go Back To Search"):
-        go_back()  # Go back to search view
+        go_back_to_search()  # Go back to search view
     report(st.session_state.selected_item_id)
-    similar_results_df = search_index(df[df['id']==st.session_state.selected_item_id].iloc[0]['summary'], index)
+    if st.button("Chat with ChatBot"):
+        chat(st.session_state.selected_item_id)
+    current_item = df[df['id']==st.session_state.selected_item_id].iloc[0]
+    similar_results_df = search_index(current_item['summary'], index)
     st.subheader("Similar Businesses")
     for _, row in similar_results_df.iterrows():
         if st.button(f"ID: {row['id']}, Product: {row['product']}, Summary: {row['summary']}, Categories: {', '.join(row['categories'])}"):
             view_report(row['id'])  # Update state and view report
+
+elif st.session_state.view_state == 'chat':
+    # Clear the previous items and show the report
+    st.empty()
+    if st.button("Go Back To Report"):
+        go_back_to_report(st.session_state.selected_item_id)
+
+    current_item = df[df['id'] == st.session_state.selected_item_id].iloc[0]
+    st.subheader("Ask ChatBot Advisor")
+
+    # Initialize or update chat history
+    if 'chat_history' not in st.session_state:
+        st.session_state.chat_history = []
+
+    # Initialize the Conversation object in session state if not already initialized
+    if 'conversation' not in st.session_state:
+        background_info = f"""
+        The above are conversation history between a user and a chatbot. Reference the conversation history to answer the user's question.
+
+        Use the following information about a circular economy business below to answer the user's question.
+
+        Product Name: {current_item['product']}
+        Product Summary: {current_item['summary']}
+        Business Problem: {current_item['problem']}
+        Business Solution: {current_item['solution']}
+        """
+        st.session_state.conversation = Conversation(background_info)
+
+    # User input for the chatbot
+    user_question = st.text_input("Your question to the ChatBot:", key="user_question")
+
+    # Button to submit the question
+    if st.button("Ask ChatBot"):
+        if user_question:
+            # Processing the question with the stored chatbot
+            response = st.session_state.conversation.ask_question(user_question)
+            # Updating the chat history
+            st.session_state.chat_history.append("User: " + user_question)
+            st.session_state.chat_history.append("ChatBot: " + response)
+
+    # Display the conversation history
+    for c in st.session_state.chat_history:
+        st.write(c)
