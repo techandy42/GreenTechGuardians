@@ -75,14 +75,14 @@ def plot_matrix(df, this_processing, this_access):
                     ),
                     name='this business')
      
-     fig.add_hline(y=0.5, line_color = "white")
-     fig.add_vline(x=0.5, line_color = "white")
+     fig.add_hline(y=0.5, line_color = "grey")
+     fig.add_vline(x=0.5, line_color = "grey")
      fig.update_layout(yaxis_range=[0,1])
      fig.update_layout(xaxis_range=[0,1])
      fig.update_traces(line_color='#ffffff', line_width=5)
-     fig.update_xaxes(linewidth=1, linecolor='white', mirror=True, ticks='inside', 
+     fig.update_xaxes(linewidth=1, linecolor='grey', mirror=True, ticks='inside', 
      showline=True)
-     fig.update_yaxes(linewidth=1, linecolor='white', mirror=True, ticks='inside', 
+     fig.update_yaxes(linewidth=1, linecolor='grey', mirror=True, ticks='inside', 
      showline=True)
      # fig.show()
      return fig

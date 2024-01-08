@@ -33,8 +33,8 @@ def scatter_results_3d(x_data, y_data, z_data, keyword):
     axis = dict(
             showbackground=False, # show axis background
             backgroundcolor="rgb(204, 204, 204)", # set background color to grey
-            gridcolor="rgb(255, 255, 255)",       # set grid line color
-            zerolinecolor="rgb(255, 255, 255)",   # set zero grid line color
+            gridcolor="rgb(169,169,169)",       # set grid line color
+            zerolinecolor="rgb(169,169,169)",   # set zero grid line color
         )
     layout = go.Layout(
             title= f"Businesses related to {keyword}", # set plot title
