@@ -111,7 +111,7 @@ vector_ids = [str(id) for id in df["id"].tolist()]
 cluster_assignment = clustering_model.labels_
 load_dotenv()
 pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-gcp-free')
-index_name = 'green'
+index_name = 'greentechguardians'
 index = pinecone.Index(index_name)
 
 percentile_score = {}

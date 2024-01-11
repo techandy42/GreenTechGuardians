@@ -10,15 +10,15 @@ client = OpenAI(
   api_key=os.environ['OPENAI_API_KEY']
 )
 
-df = pd.read_json('outputs/combined_data_first_200_rows.jsonl', lines=True)
+df = pd.read_json('../outputs/combined_data_first_200_rows.jsonl', lines=True)
 
 df['combined_text'] = df.apply(lambda x: f"{x['product']} {x['summary']} {' '.join(x['categories'])}", axis=1)
 
 pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-gcp-free')
 
-EMBEDDING_DIMENSION = 2048
+EMBEDDING_DIMENSION = 1536
 
-index_name = 'green'
+index_name = 'greentechguardians'
 if index_name not in pinecone.list_indexes():
     pinecone.create_index(index_name, dimension=EMBEDDING_DIMENSION)
 index = pinecone.Index(index_name)
@@ -26,7 +26,7 @@ index = pinecone.Index(index_name)
 print("=" * 10 + " Pinecone Index Initialized " + "=" * 10)
 
 def get_embeddings(texts):
-    response = client.embeddings.create(input=texts, model="text-similarity-babbage-001")
+    response = client.embeddings.create(input=texts, model="text-embedding-ada-002")
     return [embedding.embedding for embedding in response.data]
 
 embeddings = get_embeddings(df['combined_text'].tolist())

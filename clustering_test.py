@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import pinecone
 load_dotenv()
 pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-gcp-free')
-index_name = 'green'
+index_name = 'greentechguardians'
 index = pinecone.Index(index_name)
 
 import pandas as pd

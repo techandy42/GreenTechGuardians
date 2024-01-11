@@ -28,7 +28,7 @@ print("=" * 10 + " Data Loaded " + "=" * 10)
 
 pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-gcp-free')
 
-index_name = 'green'
+index_name = 'greentechguardians'
 index = pinecone.Index(index_name)
 
 print("=" * 10 + " Pinecone Index Loaded " + "=" * 10)

@@ -15,7 +15,7 @@ client = OpenAI(
 )
 
 def get_embeddings(texts):
-    response = client.embeddings.create(input=texts, model="text-similarity-babbage-001")
+    response = client.embeddings.create(input=texts, model="text-embedding-ada-002")
     return [embedding.embedding for embedding in response.data]
 
 def search_index(query, index, top_k=10):
@@ -31,7 +31,7 @@ print("=" * 10 + " Data Loaded " + "=" * 10)
 
 pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-gcp-free')
 
-index_name = 'green'
+index_name = 'greentechguardians'
 index = pinecone.Index(index_name)
 
 print("=" * 10 + " Pinecone Index Loaded " + "=" * 10)
