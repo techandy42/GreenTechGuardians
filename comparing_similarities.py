@@ -56,7 +56,7 @@ def get_similar_businesses_in_percentile(business_id, df, cluster_assignment, cl
     # Get the data for the specific cluster
     cluster_mask = (cluster_assignment == business_cluster)
     cluster_percentiles = {
-        "embedded": np.percentile(df.loc[cluster_mask, "embedded_value"], np.mean(business_embedding)),
+        "embedded": np.percentile(df.loc[cluster_mask, "embedded_value"], np.mean(df.loc[df['id'] == business_id, "embedded_value"])),
         "access": np.percentile(df.loc[cluster_mask, "access_level"], np.mean(df.loc[df['id'] == business_id, "access_level"])),
         "processing": np.percentile(df.loc[cluster_mask, "processing_level"], np.mean(df.loc[df['id'] == business_id, "processing_level"]))
     }
