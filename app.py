@@ -44,6 +44,9 @@ def search_index(query, index, top_k=10):
 
     rerank_results = co.rerank(query=query, documents=similarity_search_docs, top_n=3, model='rerank-english-v2.0')
     relevant_rerank_results = [rerank_result for rerank_result in rerank_results if rerank_result.relevance_score > 0.3]
+    # Take the best result if no relevant results
+    if len(relevant_rerank_results) == 0:
+        relevant_rerank_results = rerank_results[:1]
     rerank_docs = [get_reranked_item(rerank_result, similarity_search_docs) for rerank_result in relevant_rerank_results]
     rerank_df = pd.DataFrame(rerank_docs)
     
@@ -63,7 +66,10 @@ index = pinecone.Index(index_name)
 print("=" * 10 + " Pinecone Index Loaded " + "=" * 10)
 
 if 'view_state' not in st.session_state:
-    st.session_state.view_state = 'search'  # Possible values: 'search', 'report'
+    st.session_state.view_state = 'search'  # Possible values: 'search', 'report' 
+
+if 'selected_prompt' not in st.session_state:
+    st.session_state.selected_prompt = None
 
 def view_report(item_id):
     # Function to view report and change state
@@ -133,19 +139,35 @@ if st.session_state.view_state == 'search':
     with col2:
         st.title("GreenTechGuardians Business Search Engine")
 
-    # The rest of your code follows
+    # Display the text input
     query = st.text_input("Enter your search query:")
-    if query:
+
+    # Function to handle prompt option selection
+    def select_prompt(option):
+        st.session_state.selected_prompt = option
+
+    # Display prompt option buttons
+    prompt_options = ["water bottle recycling", "fossil fuel replacement", "forest protection"]
+    cols = st.columns(len(prompt_options))  # Create columns for the buttons
+    for i, option in enumerate(prompt_options):
+        cols[i].button(option, key=option, on_click=select_prompt, args=(option,))
+
+    # Modify the conditional to check for query or selected prompt
+    if query != '' or st.session_state.selected_prompt is not None:
+        if st.session_state.selected_prompt is not None:
+            query = st.session_state.selected_prompt
+        st.session_state.selected_prompt = None
+        
         results_df, tags = search_index(query, index)
         st.markdown(custom_style, unsafe_allow_html=True)
         tag_string = ''.join([f'<span class="bubble-tag">#{tag}</span>' for tag in tags])
         st.markdown(f"{tag_string}", unsafe_allow_html=True)
 
-        for index, row in results_df.iterrows():
+        for i, row in results_df.iterrows():
             button_label = f"Product: {row['product']}\nSummary: {row['summary']}\nCategories: {', '.join(row['categories'])}\nRelevance Score: {row['relevance_score']}"
 
             # Use the index as a unique key for each button
-            if st.button(button_label, key=index, type="primary"):
+            if st.button(button_label, key=i, type="primary"):
                 view_report(row['id'])
 
         x_data = results_df['embedded_value'].tolist()
@@ -167,11 +189,11 @@ elif st.session_state.view_state == 'report':
     tag_string = ''.join([f'<span class="bubble-tag">#{tag}</span>' for tag in tags])
     st.markdown(f"{tag_string}", unsafe_allow_html=True)
 
-    for index, row in results_df.iterrows():
+    for i, row in results_df.iterrows():
         button_label = f"Product: {row['product']}\nSummary: {row['summary']}\nCategories: {', '.join(row['categories'])}\nRelevance Score: {row['relevance_score']}"
 
         # Use the index as a unique key for each button
-        if st.button(button_label, key=index, type="primary"):
+        if st.button(button_label, key=i, type="primary"):
             view_report(row['id'])
 
 elif st.session_state.view_state == 'chat':
