@@ -43,7 +43,8 @@ def search_index(query, index, top_k=10):
     print('top-k retrieved:', [doc['id'] for doc in similarity_search_docs])
 
     rerank_results = co.rerank(query=query, documents=similarity_search_docs, top_n=3, model='rerank-english-v2.0')
-    rerank_docs = [get_reranked_item(rerank_result, similarity_search_docs) for rerank_result in rerank_results]
+    relevant_rerank_results = [rerank_result for rerank_result in rerank_results if rerank_result.relevance_score > 0.3]
+    rerank_docs = [get_reranked_item(rerank_result, similarity_search_docs) for rerank_result in relevant_rerank_results]
     rerank_df = pd.DataFrame(rerank_docs)
     
     print('top-n reranked:', [doc['id'] for doc in rerank_docs])
@@ -141,7 +142,7 @@ if st.session_state.view_state == 'search':
         st.markdown(f"{tag_string}", unsafe_allow_html=True)
 
         for index, row in results_df.iterrows():
-            button_label = f"Product: {row['product']}\nSummary: {row['summary']}\nCategories: {', '.join(row['categories'])}"
+            button_label = f"Product: {row['product']}\nSummary: {row['summary']}\nCategories: {', '.join(row['categories'])}\nRelevance Score: {row['relevance_score']}"
 
             # Use the index as a unique key for each button
             if st.button(button_label, key=index, type="primary"):
@@ -167,7 +168,7 @@ elif st.session_state.view_state == 'report':
     st.markdown(f"{tag_string}", unsafe_allow_html=True)
 
     for index, row in results_df.iterrows():
-        button_label = f"Product: {row['product']}\nSummary: {row['summary']}\nCategories: {', '.join(row['categories'])}"
+        button_label = f"Product: {row['product']}\nSummary: {row['summary']}\nCategories: {', '.join(row['categories'])}\nRelevance Score: {row['relevance_score']}"
 
         # Use the index as a unique key for each button
         if st.button(button_label, key=index, type="primary"):
