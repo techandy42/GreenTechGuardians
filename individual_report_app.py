@@ -48,19 +48,19 @@ def report(id):
      st.write(round(business['processing_level'],2))
      st.write(f"This business is at the {round(percentiles['business_processing_percentile'],2)}th percentile of similar businesses")
      with st.expander("See reasoning"):
-          st.write((get_processing_reason(business['problem'], business['solution'], business['processing_level']).processing_reasoning))
+          st.write(business['processing_level_reasoning'])
      st.subheader("Access Level")
      st.write(f"How hard is it to retrieve the relevant materials for this {business['product']}?")
      st.write(round(business['access_level'],2))
      st.write(f"This business is at the {round(percentiles['business_access_percentile'],2)}th percentile of similar businesses")
      with st.expander("See reasoning"):
-          st.write((get_access_reason(business['problem'], business['solution'], business['access_level']).access_reasoning))
+          st.write(business['access_level_reasoning'])
      st.subheader("Embedded Value Rating")
      st.write(f"How much value do the relevant materials contain for {business['product']}?")
      st.write(round(business['embedded_value'],2))
      st.write(f"This business is at the {round(percentiles['business_embedded_percentile'],2)}th percentile of similar businesses")
      with st.expander("See reasoning"):
-          st.write((get_embedded_value_reason(business['problem'], business['solution'], business['embedded_value'],business['product']).embedded_value_reasoning))
+          st.write(business['embedded_value_reasoning'])
      st.subheader("Business Strategies Deployed:")
      for c in business['categories']:
           with st.expander(strat_full_names[c]):
