@@ -83,7 +83,7 @@ def extract_data_from_csv_file(df, jsonl_file_name, st=None):
 
 if __name__ == "__main__":
   df = pd.read_csv('AI_EarthHack_Dataset.csv', encoding='latin-1')
-  df = df.iloc[:2]
+  df = df.iloc[100:200]
   added_items = extract_data_from_csv_file(df, "./outputs/extracted_data_training_dataset.jsonl")
   print("Added Items:")
   for item in added_items:
