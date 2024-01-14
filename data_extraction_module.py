@@ -1,6 +1,7 @@
 import pandas as pd
 from question_tree_module import ask_questions_in_tree
 import json
+import os
 
 def get_last_index(jsonl_file_name):
   # Initialize a variable to store the last line
@@ -18,19 +19,37 @@ def get_last_index(jsonl_file_name):
       last_json_object = None
 
   if last_json_object is None:
-      raise Exception("No last JSON object found")
+      return 0
   else:
       return last_json_object['id']
 
+def check_and_create_file(file_path):
+    """
+    Check if a file exists at the given path, and if it doesn't exist, create it.
+    
+    :param file_path: Path of the file to check and create.
+    """
+    if not os.path.exists(file_path):
+        with open(file_path, 'w') as file:
+            # Create an empty file
+            pass
+        print(f"File created at {file_path}")
+    else:
+        print("File already exists.")
+
 def extract_data_from_csv_file(df, jsonl_file_name):
+  check_and_create_file(jsonl_file_name)
+
   added_index_list = []
+  last_index = get_last_index(jsonl_file_name)
+  item_index = 0
   with open(jsonl_file_name, 'a') as file:
     for index, row in df.iterrows():
       try:
         product, summary, embedded_value, embedded_value_reasoning, access_level, access_level_reasoning, processing_level, processing_level_reasoning, categories, categories_reasoning = ask_questions_in_tree(row['problem'], row['solution'])
-        last_index = get_last_index(jsonl_file_name)
-        current_index = last_index + 1 + index
+        current_index = last_index + 1 + item_index
         added_index_list.append(current_index)
+        item_index += 1
         data = {
           "id": current_index,
           "product": product,
@@ -48,11 +67,11 @@ def extract_data_from_csv_file(df, jsonl_file_name):
         file.write(json_data)
         file.write('\n')
         print("=" * 50)
-        print(f"{index}: Processed {row['id']}...")
+        print(f"row {index} in dataframe: Processed item {current_index}...")
         print("=" * 50)
       except:
         print("=" * 50)
-        print(f"{index}: Error while processing {row['id']}... Moving to next item...")
+        print(f"row {index} in dataframe: Error while processing item {current_index}... Moving to next item...")
         print("=" * 50)
         continue
 
