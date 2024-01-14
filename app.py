@@ -71,6 +71,9 @@ if 'view_state' not in st.session_state:
 if 'selected_prompt' not in st.session_state:
     st.session_state.selected_prompt = None
 
+if 'conversation' not in st.session_state:
+    st.session_state.conversation = None
+
 def view_report(item_id):
     # Function to view report and change state
     st.session_state.view_state = 'report'
@@ -85,12 +88,14 @@ def chat(item_id):
 def go_back_to_search():
     # Function to go back to the search view
     st.session_state.view_state = 'search'
+    st.session_state.selected_prompt = None
     st.experimental_rerun()
 
 def go_back_to_report(item_id):
     # Function to go back to the report view
     st.session_state.view_state = 'report'
     st.session_state.selected_item_id = item_id
+    st.session_state.conversation = None
     st.experimental_rerun()
 
 # Main App
@@ -154,9 +159,11 @@ if st.session_state.view_state == 'search':
 
     # Modify the conditional to check for query or selected prompt
     if query != '' or st.session_state.selected_prompt is not None:
+        if query != '':
+            st.session_state.selected_prompt = None
+        
         if st.session_state.selected_prompt is not None:
             query = st.session_state.selected_prompt
-        st.session_state.selected_prompt = None
         
         results_df, tags = search_index(query, index)
         st.markdown(custom_style, unsafe_allow_html=True)
@@ -168,6 +175,7 @@ if st.session_state.view_state == 'search':
 
             # Use the index as a unique key for each button
             if st.button(button_label, key=i, type="primary"):
+                print("viewing report ...")
                 view_report(row['id'])
 
         x_data = results_df['embedded_value'].tolist()
@@ -205,12 +213,8 @@ elif st.session_state.view_state == 'chat':
     current_item = df[df['id'] == st.session_state.selected_item_id].iloc[0]
     st.subheader("Ask ChatBot Advisor")
 
-    # Initialize or update chat history
-    if 'chat_history' not in st.session_state:
-        st.session_state.chat_history = []
-
     # Initialize the Conversation object in session state if not already initialized
-    if 'conversation' not in st.session_state:
+    if st.session_state.conversation is None:
         background_info = f"""
         The above are conversation history between a user and a chatbot. Reference the conversation history to answer the user's question.
 
@@ -229,12 +233,8 @@ elif st.session_state.view_state == 'chat':
     # Button to submit the question
     if st.button("Ask ChatBot"):
         if user_question:
-            # Processing the question with the stored chatbot
-            response = st.session_state.conversation.ask_question(user_question)
-            # Updating the chat history
-            st.session_state.chat_history.append("User: " + user_question)
-            st.session_state.chat_history.append("ChatBot: " + response)
+            st.session_state.conversation.ask_question(user_question)
 
     # Display the conversation history
-    for c in st.session_state.chat_history:
-        st.write(c)
+    for dialog in st.session_state.conversation.chat_history:
+        st.write(dialog['content'])
