@@ -9,6 +9,7 @@ from data_visualization_app import scatter_results_3d
 from chatbot_module import Conversation
 from search_query_tags_module import get_search_query_tags
 import cohere
+from data_extraction_module import extract_data_from_csv_file, get_last_index
 
 load_dotenv()
 
@@ -133,6 +134,24 @@ custom_style = """
 
 if st.session_state.view_state == 'search':
 
+    file = st.file_uploader("Upload my own CSV dataset to search from")
+    user_uploaded = False
+    uploaded_ids = []
+    if file is not None:
+        try:
+            uploaded_df = pd.read_csv(file, encoding="latin-1")
+            # new_index_name = 'greentechguardiansplus'
+            # new_index = pinecone.Index(new_index_name)
+            # new_index = new_index.delete(delete_all=True)
+
+            # extract_data_from_csv_file(uploaded_df, "user_uploaded_extraction.jsonl")
+            # st.write(df)
+            user_uploaded = True
+            # get uploaded ids
+            # data extract
+        except:
+            st.write("Invalid File Format")
+
     # Create two columns. Adjust the ratios as needed.
     col1, col2 = st.columns([1, 3]) 
 
@@ -145,13 +164,17 @@ if st.session_state.view_state == 'search':
         st.title("GreenTechGuardians Business Search Engine")
 
     # Display the text input
-    query = st.text_input("Enter your search query:")
+    prompt = "Enter your search query for our general database:"
+    if user_uploaded:
+        prompt = "Enter your search query for your uploaded dataset:"
+    query = st.text_input(prompt)
 
     # Function to handle prompt option selection
     def select_prompt(option):
         st.session_state.selected_prompt = option
 
     # Display prompt option buttons
+    st.write("Example searches:")
     prompt_options = ["water bottle recycling", "fossil fuel replacement", "forest protection"]
     cols = st.columns(len(prompt_options))  # Create columns for the buttons
     for i, option in enumerate(prompt_options):
@@ -166,6 +189,8 @@ if st.session_state.view_state == 'search':
             query = st.session_state.selected_prompt
         
         results_df, tags = search_index(query, index)
+        if user_uploaded:
+            results_df = results_df[results_df['id'].isin(uploaded_ids)]
         st.markdown(custom_style, unsafe_allow_html=True)
         tag_string = ''.join([f'<span class="bubble-tag">#{tag}</span>' for tag in tags])
         st.markdown(f"{tag_string}", unsafe_allow_html=True)
@@ -181,7 +206,7 @@ if st.session_state.view_state == 'search':
         x_data = results_df['embedded_value'].tolist()
         y_data = results_df['processing_level'].tolist()
         z_data = results_df['access_level'].tolist()
-        scatter_results_3d(x_data, y_data, z_data, query)
+        # scatter_results_3d(x_data, y_data, z_data, query)
 
 elif st.session_state.view_state == 'report':
     # Clear the previous items and show the report
