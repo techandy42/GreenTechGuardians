@@ -3,10 +3,12 @@ from pydantic import BaseModel
 
 class Response(BaseModel):
      embedded_value: float
+     reasoning: str
 
 json_format = """
 {
-  "embedded_value": float
+  "embedded_value": float,
+  "reasoning": str
 }
 """
 
@@ -17,6 +19,8 @@ def get_embedded_value(product, summary, problem, solution):
   prompt = f"""
 You will be presented with a product name in a circular economy business. Given the product name, rate the embedded value of the product based on the following criteria to provide a decimal number between 0 and 1, where 0 indicates low embedded value, 1 indicates high embedded value, and 0.5 indicates medium embedded value.
 Rating criteria: 1) market price: the higher the market price for a unit of the product, the higher the embedded value (EX: industrial equipments (1), high-tech printers (0.6), diamond (1), paper (0), high fashion (0.6)) 2) maintenance: if maintenance of the product is expensive, the embedded value is high (EX: Xerox printers leased to corporations (0.8)) 3) Uniqueness: If the product contains cutting-edge technology, its embedded value is high (EX: software (0.8) 4) market demand: markets that have growing demand have products containing higher embedded value (EX: renewable energy sector products (0.6))
+
+In addition, explain in 25 words why the product have received that rating for embedded value. The reasoning should reflect the rating criteria above.
 
 Product Name:
 

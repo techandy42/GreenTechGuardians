@@ -1,12 +1,23 @@
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+from gpt_module import clean_response, gpt_call
+from pydantic import BaseModel
+from typing import List
 
 load_dotenv()
 
 client = OpenAI(
   api_key=os.environ.get("OPENAI_API_KEY")
 )
+class Response(BaseModel):
+     sample_questions: List[str]
+
+json_format = """
+{
+  "sample_questions": List[str]
+}
+"""
 
 class Conversation:
   def __init__(self, background_info: str):
@@ -24,3 +35,27 @@ class Conversation:
     self.chat_history.append({"role": "assistant", "content": completion.choices[0].message.content})
 
     return completion.choices[0].message.content
+  
+  def get_access_level(self, product, summary, problem, solution):
+    sys_msg = None
+    prompt = f"""
+    You will be presented with a conversation between the user and a business advisory chatbot.
+    Given the following question and answer between the user and the chatbot, please generate three sample questions that the user might ask next.
+    
+    User Question:
+    {self.chat_history[-2]['content']}
+
+    Chatbot Answer:
+    {self.chat_history[-1]['content']}
+    """
+    response = gpt_call(sys_msg, prompt, json_format)
+
+    cleaned_response = clean_response(response)
+
+    print(cleaned_response)
+    
+    validated_response = Response.model_validate_json(cleaned_response)
+
+    print(validated_response)
+    
+    return validated_response

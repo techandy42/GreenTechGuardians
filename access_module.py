@@ -3,10 +3,12 @@ from pydantic import BaseModel
 
 class Response(BaseModel):
      access_level: float
+     reasoning: str
 
 json_format = """
 {
-  "access_level": float
+  "access_level": float,
+  "reasoning": str
 }
 """
 
@@ -23,6 +25,8 @@ Evaluation criteria:
 (EX: if the product is water bottle recycling in Norway, and if Norwegian citizens are more willing to recycle water bottles, then the score will lean closer to 0) 
 2) Infrastructure and accessibility: Straightforward and streamlined retrieval processes makes is easier to access the product 
 (EX: recycling bins (easy, closer to 0), washing machines (hard, closer to 1), industrial equipment requiring infrastructural partnerships to retrieve (hard, closer to 1), products located in remote or difficult-to-reach areas (hard, closer to 1), wind turbines (hard, closer to 1), products requiring specialized equipment or expertise to retrieve (hard, closer to 1)) 3) Existence of secondary markets: products containing materials with higher resale value are harder to access (EX: construction equipment (hard, closer to 1), carpets (easy, closer to 0)).
+
+In addition, explain in 25 words why the product have received that rating for access level value. The reasoning should reflect the rating criteria above.
 
 Product Name:
 

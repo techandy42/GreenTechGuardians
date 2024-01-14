@@ -2,10 +2,12 @@ from gpt_module import clean_response, gpt_call
 from pydantic import BaseModel
 class Response(BaseModel):
      processing_level: float
+     reasoning: str
 
 json_format = """
 {
-  "processing_level": float
+  "processing_level": float,
+  "reasoning": str
 }
 """
 
@@ -21,6 +23,8 @@ Evaluation Criteria:
 1) Size: Assess the difficulty of processing based on the mass of the product. (EX: extremely heavy or bulky products (hard, closer to 1), light and small products (easy, closer to 0), washing machine (hard, closer to 1), ink cartridge (easy, closer to 0)) 
 2) Chemical Toxicity: more hazardous materials are more difficult and expensive to process (EX: Non-toxic materials like paper (easy, closer to 0), Hazardous chemicals or radioactive materials (hard, closer to 1), advanced smartphones and laptops (hard, closer to 1)) 
 3) Technology Needed: Rate the processing difficulty based on the level of technology required for processing (EX: Low-tech processing like manual labor (easy, closer to 0), High-tech processes involving specialized machinery (hard, closer to 1))
+
+In addition, explain in 25 words why the product have received that rating for processing level value. The reasoning should reflect the rating criteria above.
 
 Product Name:
 
