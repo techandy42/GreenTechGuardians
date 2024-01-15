@@ -67,6 +67,14 @@ def extract_data_from_csv_file(df, jsonl_file_name, st=None):
           "categories_reasonings": categories_reasonings,
           "problem": row["problem"],
           "solution": row["solution"],
+          "keywords": row["Keywords"],
+          "total_raised": row["TotalRaised"],
+          "business_status": row["BusinessStatus"],
+          "num_competitors": row["NumCompetitors"],
+          "circular_economy": row["CircularEconomy"],
+          "random": row["Random"],
+          "sustainability": row["Sustainability"],
+          "adversarial": row["Adversarial"],
         }
         added_items.append(data)
         json_data = json.dumps(data)
@@ -84,9 +92,9 @@ def extract_data_from_csv_file(df, jsonl_file_name, st=None):
   return added_items
 
 if __name__ == "__main__":
-  df = pd.read_csv('AI_EarthHack_Dataset.csv', encoding='latin-1')
-  df = df.iloc[:5]
-  added_items = extract_data_from_csv_file(df, "./outputs/extracted_data_training_dataset.jsonl")
+  df = pd.read_csv('ValidationSet_AI_Earthhack - ValidationSet.csv', encoding='latin-1')
+  df = df.iloc[100:]
+  added_items = extract_data_from_csv_file(df, "./outputs/extracted_data_validation_dataset.jsonl")
   print("Added Items:")
   for item in added_items:
      print(f"- {item['id']}: {item['product']}")
