@@ -7,10 +7,6 @@ from clustering_test import clustering_model
 from dotenv import load_dotenv
 import pinecone
 import os
-from processing_reasoning_module import get_processing_reason
-from access_reasoning_module import get_access_reason
-from embedded_value_reasoning_module import get_embedded_value_reason
-from categories_reasoning_module import get_category_reason
 from solution_rating import percentile_score
 
 load_dotenv()
@@ -62,11 +58,11 @@ def report(id):
      with st.expander("See reasoning"):
           st.write(business['embedded_value_reasoning'])
      st.subheader("Business Strategies Deployed:")
-     for c in business['categories']:
+     for i, c in enumerate(business['categories']):
           with st.expander(strat_full_names[c]):
                st.write(strat_descriptions[c])
                st.write("Reasoning:")
-               st.write((get_category_reason(business['problem'], business['solution'], c).category_reasoning))
+               st.write(business['categories_reasonings'][i] if (len(business['categories_reasonings']) == len(business['categories'])) else "No reasoning provided")
      st.subheader(f"How does the {business['product']} business compare with similar businesses in the Circular Economy? - The Circular Matrix")
      similar_businesses = df[df['id'].isin(clusters[cluster_assignment[id]])]
      st.write(plot_matrix(similar_businesses, business['processing_level'], business['access_level']))
