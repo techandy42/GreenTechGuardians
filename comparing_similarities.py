@@ -12,7 +12,7 @@ pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-
 index_name = 'greentechguardians'
 index = pinecone.Index(index_name)
 
-df = pd.read_json('outputs/combined_data_first_200_rows.jsonl', lines=True)
+df = pd.read_json('outputs/extracted_data_training_dataset.jsonl', lines=True)
 
 # Get business IDs and cluster assignments
 vector_ids = [str(id) for id in df["id"].tolist()]

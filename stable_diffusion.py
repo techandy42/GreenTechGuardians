@@ -4,7 +4,7 @@ from diffusers import StableDiffusionPipeline
 import torch
 from PIL import Image
 
-df = pd.read_csv('./outputs/combined_data_first_200_rows.csv', encoding='latin-1')
+df = pd.read_csv('./outputs/extracted_data_training_dataset.csv', encoding='latin-1')
 prompts = list(df['product'])
 images = []
 

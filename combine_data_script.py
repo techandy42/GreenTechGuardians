@@ -15,7 +15,7 @@ for index, row in extracted_dataset.iterrows():
     extracted_dataset['solution'] = original_dataset['solution']
 
 # Save to a .jsonl file
-with open(f'combined_data_first_200_rows.jsonl', 'w') as file:
+with open(f'extracted_data_training_dataset.jsonl', 'w') as file:
     for index, row in extracted_dataset.iterrows():
         data = {
             "id": row['id'],

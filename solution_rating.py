@@ -10,7 +10,7 @@ import pinecone
 import os
 from scipy.stats import percentileofscore
 
-df = pd.read_csv('./outputs/combined_data_first_200_rows.csv', encoding='latin-1')
+df = pd.read_json('outputs/extracted_data_training_dataset.jsonl', lines=True)
 solutions = list(df['solution'])
 ids = list(df['id'])
 embedded_values = list(df['embedded_value'])

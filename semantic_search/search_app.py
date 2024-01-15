@@ -22,7 +22,7 @@ def search_index(query, index, top_k=10):
     ids = [int(match['id']) for match in query_results['results'][0]['matches']]
     return df[df['id'].isin(ids)]
 
-df = pd.read_json('outputs/combined_data_first_200_rows.jsonl', lines=True)
+df = pd.read_json('outputs/extracted_data_training_dataset.jsonl', lines=True)
 
 print("=" * 10 + " Data Loaded " + "=" * 10)
 

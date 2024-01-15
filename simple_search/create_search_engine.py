@@ -3,7 +3,7 @@ from whoosh.fields import Schema, TEXT
 import os
 import pandas as pd
 
-df = pd.read_json('outputs/combined_data_first_200_rows.jsonl', lines=True)
+df = pd.read_json('outputs/extracted_data_training_dataset.jsonl', lines=True)
 
 combined_list = df.apply(lambda row: f"{row['product']} {row['summary']} {' '.join(row['categories'])}", axis=1).tolist()
 

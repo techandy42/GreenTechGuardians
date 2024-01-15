@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-extracted = pd.read_json(path_or_buf='./outputs/combined_data_first_200_rows.jsonl', lines=True)
+extracted = pd.read_json(path_or_buf='./outputs/extracted_data_training_dataset.jsonl', lines=True)
 extracted = extracted.to_numpy()
 ids = extracted[:,0]
 embedded_values = extracted[:,3]
