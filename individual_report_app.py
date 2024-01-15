@@ -19,7 +19,7 @@ index_name = 'greentechguardians'
 index = pinecone.Index(index_name)
 
 
-df = pd.read_json('outputs/combined_data_first_200_rows.jsonl', lines=True)
+df = pd.read_json('outputs/extracted_data_training_dataset.jsonl', lines=True)
 strat_descriptions = {"RPO":"Retain Product Ownership: Producer rents or leases rather than selling the product.",
                       "DFR":"Design for Recycling: The company redesigns the product or its manufacturing and related processes to maximize recoverability of the materials involved.",
                       "PLE": "Product Life Extension: The company produces its product to last longer either by design or by providing related services.",

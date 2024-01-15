@@ -55,7 +55,7 @@ def search_index(query, index, top_k=10):
 
     return rerank_df, search_query_tags
 
-df = pd.read_json('outputs/combined_data_first_200_rows.jsonl', lines=True)
+df = pd.read_json('outputs/extracted_data_training_dataset.jsonl', lines=True)
 
 print("=" * 10 + " Data Loaded " + "=" * 10)
 
