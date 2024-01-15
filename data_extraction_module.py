@@ -37,7 +37,7 @@ def check_and_create_file(file_path):
     else:
         print("File already exists.")
 
-def extract_data_from_csv_file(df, jsonl_file_name):
+def extract_data_from_csv_file(df, jsonl_file_name, st=None):
   check_and_create_file(jsonl_file_name)
 
   added_items = []
@@ -46,6 +46,10 @@ def extract_data_from_csv_file(df, jsonl_file_name):
   with open(jsonl_file_name, 'a') as file:
     for index, row in df.iterrows():
       try:
+        try:
+           st.progress(int((index-last_index)/len(df.iterrows())*100))
+        except:
+           pass
         product, summary, embedded_value, embedded_value_reasoning, access_level, access_level_reasoning, processing_level, processing_level_reasoning, categories, categories_reasonings = ask_questions_in_tree(row['problem'], row['solution'])
         current_index = last_index + 1 + item_index
         item_index += 1

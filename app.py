@@ -55,7 +55,7 @@ def search_index(query, index, top_k=10):
 
     return rerank_df, search_query_tags
 
-df = pd.read_json('outputs/combined_data_first_200_rows.jsonl', lines=True)
+df = pd.read_json('outputs/extracted_data_training_dataset.jsonl', lines=True)
 
 print("=" * 10 + " Data Loaded " + "=" * 10)
 
@@ -74,6 +74,19 @@ if 'selected_prompt' not in st.session_state:
 
 if 'conversation' not in st.session_state:
     st.session_state.conversation = None
+if 'user_uploaded' not in st.session_state:
+    st.session_state.user_uploaded = False
+
+if 'uploaded_file' not in st.session_state:
+    st.session_state.uploaded_file = None
+
+if 'new_index' not in st.session_state:
+    new_index_name = 'greentechguardiansplus'
+    EMBEDDING_DIMENSION = 1536
+    if new_index_name not in pinecone.list_indexes():
+        pinecone.create_index(new_index_name, dimension=EMBEDDING_DIMENSION)
+    new_index = pinecone.Index(new_index_name)
+    st.session_state.new_index = new_index
 
 if 'selected_question' not in st.session_state:
     st.session_state.selected_question = None
@@ -144,19 +157,25 @@ custom_style = """
 
 if st.session_state.view_state == 'search':
 
-    file = st.file_uploader("Upload my own CSV dataset to search from")
-    user_uploaded = False
+    st.session_state.uploaded_file = st.file_uploader("Upload my own CSV dataset to search from")
     uploaded_ids = []
-    if file is not None:
+    if st.session_state.uploaded_file is not None and st.session_state.user_uploaded == False:
         try:
-            uploaded_df = pd.read_csv(file, encoding="latin-1")
-            # new_index_name = 'greentechguardiansplus'
-            # new_index = pinecone.Index(new_index_name)
-            # new_index = new_index.delete(delete_all=True)
-
-            # extract_data_from_csv_file(uploaded_df, "user_uploaded_extraction.jsonl")
+            uploaded_df = pd.read_csv(st.session_state.uploaded_file, encoding="latin-1")
+            items = extract_data_from_csv_file(uploaded_df, "user_uploaded_extraction.jsonl", st=st)
+            print(items)
+            uploaded_ids=range(1,len(items)+1)
+            
+            df_uploaded = pd.DataFrame(items)
+            print(df_uploaded)
+            df_uploaded['combined_text'] = df_uploaded.apply(lambda x: f"{x['product']} {x['summary']} {' '.join(x['categories'])}", axis=1)
+            embeddings = get_embeddings(df_uploaded['combined_text'].tolist())
+            print("=" * 10 + " OpenAI Embeddings Created " + "=" * 10)
+            to_upload = [(str(id), embedding) for id, embedding in zip(df_uploaded['id'], embeddings)]
+            st.session_state.new_index.upsert(vectors=to_upload)
+            
             # st.write(df)
-            user_uploaded = True
+            st.session_state.user_uploaded = True
             # get uploaded ids
             # data extract
         except:
@@ -175,7 +194,7 @@ if st.session_state.view_state == 'search':
 
     # Display the text input
     prompt = "Enter your search query for our general database:"
-    if user_uploaded:
+    if st.session_state.user_uploaded:
         prompt = "Enter your search query for your uploaded dataset:"
     query = st.text_input(prompt)
 
@@ -194,9 +213,10 @@ if st.session_state.view_state == 'search':
         if st.session_state.selected_prompt is not None:
             query = st.session_state.selected_prompt
         
-        results_df, tags = search_index(query, index)
-        if user_uploaded:
-            results_df = results_df[results_df['id'].isin(uploaded_ids)]
+        if st.session_state.user_uploaded:
+            results_df, tags = search_index(query, st.session_state.new_index)
+        else:
+            results_df, tags = search_index(query, index)
         st.markdown(custom_style, unsafe_allow_html=True)
         tag_string = ''.join([f'<span class="bubble-tag">#{tag}</span>' for tag in tags])
         st.markdown(f"{tag_string}", unsafe_allow_html=True)
