@@ -97,6 +97,17 @@ def get_percentiles_for_business(business_id, df, cluster_assignment, clustering
         "business_processing_percentile": business_processing_percentile
     }
 
+# rating_type  should be either embedded_value, processing_level, or access_level
+def get_modified_percentile(business_id, df, cluster_assignment, clustering_model, index, new_rating, rating_type):
+    fetch_result = index.fetch(ids=[str(business_id)])
+    business_embedding = fetch_result.to_dict()['vectors'][str(business_id)]['values']
+    business_cluster = clustering_model.predict([business_embedding])[0]
+
+    cluster_mask = (cluster_assignment == business_cluster)
+    cluster_values = df.loc[cluster_mask, rating_type].tolist()
+    business__percentile = percentileofscore(cluster_values, new_rating)
+    return business__percentile
+
 # Example usage:
 business_id_to_check = 22 
 percentile_results = get_percentiles_for_business(business_id_to_check, df, cluster_assignment, clustering_model, index)

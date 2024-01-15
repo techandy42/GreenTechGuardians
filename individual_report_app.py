@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from circular_matrix import plot_matrix, get_suggestion
 from clustering_test import cluster_assignment, clusters
-from comparing_similarities import get_percentiles_for_business
+from comparing_similarities import get_percentiles_for_business, get_modified_percentile
 from clustering_test import clustering_model
 from dotenv import load_dotenv
 import pinecone
@@ -13,6 +13,26 @@ load_dotenv()
 pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-gcp-free')
 index_name = 'greentechguardians'
 index = pinecone.Index(index_name)
+
+if 'processing_rating' not in st.session_state:
+    st.session_state.processing_rating = None
+if 'access_rating' not in st.session_state:
+    st.session_state.access_rating = None
+if 'embedded_value_rating' not in st.session_state:
+    st.session_state.embedded_value_rating = None
+if 'processing_reasoning' not in st.session_state:
+    st.session_state.processing_reasoning = None
+if 'access_reasoning' not in st.session_state:
+    st.session_state.access_reasoning= None
+if 'embedded_value_reasoning' not in st.session_state:
+    st.session_state.embedded_value_reasoning = None
+if 'processing_percentile' not in st.session_state:
+    st.session_state.processing_percentile = None
+if 'access_percentile' not in st.session_state:
+    st.session_state.access_percentile = None
+if 'embedded_value_percentile' not in st.session_state:
+    st.session_state.embedded_value_percentile = None
+
 
 
 df = pd.read_json('outputs/extracted_data_training_dataset.jsonl', lines=True)
@@ -39,24 +59,115 @@ def report(id):
      st.subheader(f"Overall Solution Score: {percentile_score[id+1]}/10")
      # columns = st.columns(3)
      percentiles = get_percentiles_for_business(id, df, cluster_assignment, clustering_model, index)
+
+     ### PROCESSING LEVEL SECTION ###
+
      st.subheader("Processing Level")
      st.write(f"How hard is it to process the relevant materials for this {business['product']}?")
-     st.write(round(business['processing_level'],2))
-     st.write(f"This business is at the {round(percentiles['business_processing_percentile'],2)}th percentile of similar businesses")
+
+     if not st.session_state.processing_rating:
+          st.session_state.processing_rating = round(business['processing_level'],2)
+     processing_rating_placeholder = st.empty()
+     processing_rating_placeholder.write(st.session_state.processing_rating)
+
+     if not st.session_state.processing_percentile:
+          st.session_state.processing_percentile = round(percentiles['business_processing_percentile'],2)
+     processing_percentile_placeholder = st.empty()
+     processing_percentile_placeholder.write(f"This business is at the {st.session_state.processing_percentile}th percentile of similar businesses")
+
      with st.expander("See reasoning"):
-          st.write(business['processing_level_reasoning'])
+          if not st.session_state.processing_reasoning:
+               st.session_state.processing_reasoning = business['processing_level_reasoning']
+          processing_reasoning_placeholder = st.empty()
+          processing_reasoning_placeholder.write(st.session_state.processing_reasoning)
+
+     with st.expander("I would like to modify this section"):
+          with st.form("Edit Processing Level"):
+               st.write("Please enter your desired content. Leave an item blank if you'd like to keep the original content.")
+               st.session_state.processing_rating = st.number_input("Enter new rating", placeholder="Enter")
+               st.session_state.processing_reasoning = st.text_input("Enter new reasoning", placeholder = "Enter")
+               submitted = st.form_submit_button("Submit")
+               if submitted:
+                    processing_rating_placeholder.empty()
+                    processing_rating_placeholder.write(round(st.session_state.processing_rating,2))
+                    processing_reasoning_placeholder.empty()
+                    processing_reasoning_placeholder.write(st.session_state.processing_reasoning)
+                    processing_percentile_placeholder.empty()
+                    st.session_state.processing_percentile = round(get_modified_percentile(id, df, cluster_assignment, clustering_model, index, st.session_state.processing_rating, "processing_level"),2)
+                    processing_percentile_placeholder.write(f"This business is at the {st.session_state.processing_percentile}th percentile of similar businesses")
+
+     ### ACCESS LEVEL SECTION ###
+                    
      st.subheader("Access Level")
      st.write(f"How hard is it to retrieve the relevant materials for this {business['product']}?")
-     st.write(round(business['access_level'],2))
-     st.write(f"This business is at the {round(percentiles['business_access_percentile'],2)}th percentile of similar businesses")
+     if not st.session_state.access_rating:
+          st.session_state.access_rating = round(business['access_level'],2)
+     access_rating_placeholder = st.empty()
+     access_rating_placeholder.write(st.session_state.access_rating)
+
+     if not st.session_state.access_percentile:
+          st.session_state.access_percentile = round(percentiles['business_access_percentile'],2)
+     access_percentile_placeholder = st.empty()
+     access_percentile_placeholder.write(f"This business is at the {st.session_state.access_percentile}th percentile of similar businesses")
+     
      with st.expander("See reasoning"):
-          st.write(business['access_level_reasoning'])
+          if not st.session_state.access_reasoning:
+               st.session_state.access_reasoning = business['access_level_reasoning']
+          access_reasoning_placeholder = st.empty()
+          access_reasoning_placeholder.write(st.session_state.access_reasoning)
+
+     with st.expander("I would like to modify this section"):
+          with st.form("Edit Access Level"):
+               st.write("Please enter your desired content. Leave an item blank if you'd like to keep the original content.")
+               st.session_state.access_rating = st.number_input("Enter new rating", placeholder="Enter")
+               st.session_state.access_reasoning = st.text_input("Enter new reasoning", placeholder = "Enter")
+               submitted = st.form_submit_button("Submit")
+               if submitted:
+                    access_rating_placeholder.empty()
+                    access_rating_placeholder.write(round(st.session_state.access_rating,2))
+                    access_reasoning_placeholder.empty()
+                    access_reasoning_placeholder.write(st.session_state.access_reasoning)
+                    access_percentile_placeholder.empty()
+                    st.session_state.access_percentile = round(get_modified_percentile(id, df, cluster_assignment, clustering_model, index, st.session_state.access_rating, "access_level"),2)
+                    access_percentile_placeholder.write(f"This business is at the {st.session_state.access_percentile}th percentile of similar businesses")
+
+     ### EMBEDDED VALUE SECTION ###
+
      st.subheader("Embedded Value Rating")
      st.write(f"How much value do the relevant materials contain for {business['product']}?")
-     st.write(round(business['embedded_value'],2))
-     st.write(f"This business is at the {round(percentiles['business_embedded_percentile'],2)}th percentile of similar businesses")
+     if not st.session_state.embedded_value_rating:
+          st.session_state.embedded_value_rating = round(business['embedded_value'],2)
+     embedded_value_rating_placeholder = st.empty()
+     embedded_value_rating_placeholder.write(st.session_state.embedded_value_rating)
+
+     if not st.session_state.embedded_value_percentile:
+          st.session_state.embedded_value_percentile = round(percentiles['business_embedded_percentile'],2)
+     embedded_value_percentile_placeholder = st.empty()
+     embedded_value_percentile_placeholder.write(f"This business is at the {st.session_state.embedded_value_percentile}th percentile of similar businesses")
+
      with st.expander("See reasoning"):
-          st.write(business['embedded_value_reasoning'])
+          if not st.session_state.embedded_value_reasoning:
+               st.session_state.embedded_value_reasoning = business['embedded_value_reasoning']
+          embedded_value_reasoning_placeholder = st.empty()
+          embedded_value_reasoning_placeholder.write(st.session_state.embedded_value_reasoning)
+     with st.expander("I would like to modify this section"):
+          with st.form("Edit Embedded Value"):
+               st.write("Please enter your desired content. Leave an item blank if you'd like to keep the original content.")
+               st.session_state.embedded_value_rating = st.number_input("Enter new rating", placeholder="Enter")
+               st.session_state.embedded_value_reasoning = st.text_input("Enter new reasoning", placeholder = "Enter")
+               # Every form must have a submit button.
+               submitted = st.form_submit_button("Submit")
+               if submitted:
+                    embedded_value_rating_placeholder.empty()
+                    embedded_value_rating_placeholder.write(round(st.session_state.embedded_value_rating,2))
+                    embedded_value_reasoning_placeholder.empty()
+                    embedded_value_reasoning_placeholder.write(st.session_state.embedded_value_reasoning)
+                    embedded_value_percentile_placeholder.empty()
+                    st.session_state.embedded_value_percentile = round(get_modified_percentile(id, df, cluster_assignment, clustering_model, index, st.session_state.embedded_value_rating, "embedded_value"),2)
+                    embedded_value_percentile_placeholder.write(f"This business is at the {st.session_state.embedded_value_percentile}th percentile of similar businesses")
+
+     ### BUSINESS STRATEGY SECTION ###
+                    
      st.subheader("Business Strategies Deployed:")
      for i, c in enumerate(business['categories']):
           with st.expander(strat_full_names[c]):
@@ -67,7 +178,7 @@ def report(id):
      similar_businesses = df[df['id'].isin(clusters[cluster_assignment[id]])]
      st.write(plot_matrix(similar_businesses, business['processing_level'], business['access_level']))
      st.header("Recommended Business Strategy")
-     suggested = get_suggestion(business['processing_level'], business['access_level'], business['embedded_value'])
+     suggested = get_suggestion(st.session_state.processing_rating, business['access_level'], business['embedded_value'])
      for c in suggested:
           if c in business['categories']:
                with st.expander(f"{c}: Already deployed!"):
