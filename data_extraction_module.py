@@ -60,7 +60,9 @@ def extract_data_from_csv_file(df, jsonl_file_name):
           "processing_level": processing_level,
           "processing_level_reasoning": processing_level_reasoning,
           "categories": categories,
-          "categories_reasonings": categories_reasonings
+          "categories_reasonings": categories_reasonings,
+          "problem": row["problem"],
+          "solution": row["solution"],
         }
         added_items.append(data)
         json_data = json.dumps(data)

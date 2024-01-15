@@ -36,17 +36,19 @@ class Conversation:
 
     return completion.choices[0].message.content
   
-  def get_access_level(self, product, summary, problem, solution):
+  def get_sample_questions(self):
     sys_msg = None
     prompt = f"""
     You will be presented with a conversation between the user and a business advisory chatbot.
     Given the following question and answer between the user and the chatbot, please generate three sample questions that the user might ask next.
-    
+    The questions you generate should be relevant to green technology, circular economy, and business.
+    If the question and answer are 'Nothing', then please generate three sample questions that directly asks about the current business, such as its business model and relevancy to green technology and circular economy.
+
     User Question:
-    {self.chat_history[-2]['content']}
+    {self.chat_history[-2]['content'] if len(self.chat_history) >= 2 else 'Nothing'}
 
     Chatbot Answer:
-    {self.chat_history[-1]['content']}
+    {self.chat_history[-1]['content'] if len(self.chat_history) >= 2 else 'Nothing'}
     """
     response = gpt_call(sys_msg, prompt, json_format)
 

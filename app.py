@@ -75,6 +75,9 @@ if 'selected_prompt' not in st.session_state:
 if 'conversation' not in st.session_state:
     st.session_state.conversation = None
 
+if 'selected_question' not in st.session_state:
+    st.session_state.selected_question = None
+
 def view_report(item_id):
     # Function to view report and change state
     st.session_state.view_state = 'report'
@@ -97,7 +100,14 @@ def go_back_to_report(item_id):
     st.session_state.view_state = 'report'
     st.session_state.selected_item_id = item_id
     st.session_state.conversation = None
+    st.session_state.selected_question = None
     st.experimental_rerun()
+
+def select_prompt(option):
+    st.session_state.selected_prompt = option
+
+def select_question(option):
+    st.session_state.selected_question = option
 
 # Main App
 
@@ -168,10 +178,6 @@ if st.session_state.view_state == 'search':
     if user_uploaded:
         prompt = "Enter your search query for your uploaded dataset:"
     query = st.text_input(prompt)
-
-    # Function to handle prompt option selection
-    def select_prompt(option):
-        st.session_state.selected_prompt = option
 
     # Display prompt option buttons
     st.write("Example searches:")
@@ -252,13 +258,25 @@ elif st.session_state.view_state == 'chat':
         """
         st.session_state.conversation = Conversation(background_info)
 
+    sample_questions_results = st.session_state.conversation.get_sample_questions()
+    sample_questions = sample_questions_results.sample_questions
+
     # User input for the chatbot
     user_question = st.text_input("Your question to the ChatBot:", key="user_question")
 
+    cols = st.columns(len(sample_questions))  # Create columns for the buttons
+    for i, option in enumerate(sample_questions):
+        cols[i].button(option, key=option, on_click=select_question, args=(option,))
+
     # Button to submit the question
-    if st.button("Ask ChatBot"):
-        if user_question:
-            st.session_state.conversation.ask_question(user_question)
+    if user_question != '' or st.session_state.selected_question is not None:
+        if user_question != '':
+            st.session_state.selected_question = None
+        
+        if st.session_state.selected_question is not None:
+            user_question = st.session_state.selected_question
+            
+        st.session_state.conversation.ask_question(user_question)
 
     # Display the conversation history
     for dialog in st.session_state.conversation.chat_history:
