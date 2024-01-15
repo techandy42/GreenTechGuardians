@@ -28,7 +28,7 @@ def get_reranked_item(rerank_result, docs):
     doc['relevance_score'] = rerank_result.relevance_score
     return doc
 
-def search_index(query, index, top_k=10):
+def search_index(query, index, df, top_k=10):
     # Get search query tags
     search_query_tags_response = get_search_query_tags(query)
     search_query_tags = search_query_tags_response.tags
@@ -38,7 +38,7 @@ def search_index(query, index, top_k=10):
     similarity_search_results = index.query(queries=[query_embedding], top_k=top_k)
     ids = [int(match['id']) for match in similarity_search_results['results'][0]['matches']]
     similarity_search_df =  df[df['id'].isin(ids)]
-    similarity_search_df['text'] = similarity_search_df.apply(lambda row: f"{row['product']} {row['summary']} {' '.join(row['categories'])}", axis=1)
+    similarity_search_df['text'] = similarity_search_df['product'] + ' ' + similarity_search_df['summary'] + ' ' + similarity_search_df['categories'].apply(lambda x: ' '.join(x))
     similarity_search_docs = similarity_search_df.to_dict(orient='records')
     
     print('top-k retrieved:', [doc['id'] for doc in similarity_search_docs])
@@ -85,11 +85,13 @@ if 'new_index' not in st.session_state:
     EMBEDDING_DIMENSION = 1536
     if new_index_name not in pinecone.list_indexes():
         pinecone.create_index(new_index_name, dimension=EMBEDDING_DIMENSION)
-    new_index = pinecone.Index(new_index_name)
-    st.session_state.new_index = new_index
+    st.session_state.new_index = pinecone.Index(new_index_name)
 
 if 'selected_question' not in st.session_state:
     st.session_state.selected_question = None
+
+if 'uploaded_df' not in st.session_state:
+    st.session_state.uploaded_df = None
 
 def view_report(item_id):
     # Function to view report and change state
@@ -158,20 +160,17 @@ custom_style = """
 if st.session_state.view_state == 'search':
 
     st.session_state.uploaded_file = st.file_uploader("Upload my own CSV dataset to search from")
-    uploaded_ids = []
     if st.session_state.uploaded_file is not None and st.session_state.user_uploaded == False:
         try:
             uploaded_df = pd.read_csv(st.session_state.uploaded_file, encoding="latin-1")
             items = extract_data_from_csv_file(uploaded_df, "user_uploaded_extraction.jsonl", st=st)
             print(items)
-            uploaded_ids=range(1,len(items)+1)
-            
-            df_uploaded = pd.DataFrame(items)
-            print(df_uploaded)
-            df_uploaded['combined_text'] = df_uploaded.apply(lambda x: f"{x['product']} {x['summary']} {' '.join(x['categories'])}", axis=1)
-            embeddings = get_embeddings(df_uploaded['combined_text'].tolist())
+            st.session_state.uploaded_df = pd.DataFrame(items)
+            print(st.session_state.uploaded_df)
+            st.session_state.uploaded_df['combined_text'] = st.session_state.uploaded_df.apply(lambda x: f"{x['product']} {x['summary']} {' '.join(x['categories'])}", axis=1)
+            embeddings = get_embeddings(st.session_state.uploaded_df['combined_text'].tolist())
             print("=" * 10 + " OpenAI Embeddings Created " + "=" * 10)
-            to_upload = [(str(id), embedding) for id, embedding in zip(df_uploaded['id'], embeddings)]
+            to_upload = [(str(id), embedding) for id, embedding in zip(st.session_state.uploaded_df['id'], embeddings)]
             st.session_state.new_index.upsert(vectors=to_upload)
             
             # st.write(df)
@@ -180,6 +179,8 @@ if st.session_state.view_state == 'search':
             # data extract
         except:
             st.write("Invalid File Format")
+    elif st.session_state.uploaded_file is None:
+        st.session_state.user_uploaded = False
 
     # Create two columns. Adjust the ratios as needed.
     col1, col2 = st.columns([1, 3]) 
@@ -213,10 +214,14 @@ if st.session_state.view_state == 'search':
         if st.session_state.selected_prompt is not None:
             query = st.session_state.selected_prompt
         
-        if st.session_state.user_uploaded:
-            results_df, tags = search_index(query, st.session_state.new_index)
+        if st.session_state.user_uploaded or st.session_state.uploaded_file is not None:
+            print("using new index")
+            print(pinecone.describe_index('greentechguardiansplus'))
+            print(st.session_state.uploaded_df)
+            results_df, tags = search_index(query, st.session_state.new_index, st.session_state.uploaded_df)
+            print(results_df)
         else:
-            results_df, tags = search_index(query, index)
+            results_df, tags = search_index(query, index, df)
         st.markdown(custom_style, unsafe_allow_html=True)
         tag_string = ''.join([f'<span class="bubble-tag">#{tag}</span>' for tag in tags])
         st.markdown(f"{tag_string}", unsafe_allow_html=True)
@@ -243,7 +248,7 @@ elif st.session_state.view_state == 'report':
         chat(st.session_state.selected_item_id)
     report(st.session_state.selected_item_id)
     current_item = df[df['id']==st.session_state.selected_item_id].iloc[0]
-    results_df, tags = search_index(current_item['summary'], index)
+    results_df, tags = search_index(current_item['summary'], index, df)
     st.markdown(custom_style, unsafe_allow_html=True)
     tag_string = ''.join([f'<span class="bubble-tag">#{tag}</span>' for tag in tags])
     st.markdown(f"{tag_string}", unsafe_allow_html=True)
