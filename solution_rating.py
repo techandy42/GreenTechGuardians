@@ -1,6 +1,5 @@
 import pandas as pd
 from comparing_similarities import get_percentiles_for_business
-
 from clustering_test import clustering_model
 import pandas as pd
 import numpy as np
@@ -9,6 +8,7 @@ from dotenv import load_dotenv
 import pinecone
 import os
 from scipy.stats import percentileofscore
+from circular_matrix import get_suggestion
 
 df = pd.read_json('outputs/extracted_data_training_dataset.jsonl', lines=True)
 solutions = list(df['solution'])
@@ -118,3 +118,12 @@ percentile_score = {}
 for id in ids:
     percentile = get_percentiles_for_business(id, df, cluster_assignment, clustering_model, index)
     percentile_score[id+1] = (int(percentile["business_embedded_percentile"] / 10)) + 1
+
+# scores by comparing with recommended strategies
+categories = list(df['categories'])
+strategy_score = {}
+for idx in range(len(solutions)):
+    recommended = get_suggestion(processing_levels[idx], access_levels[idx], embedded_values[idx])
+    category = categories[idx]
+    if recommended == category:
+        strategy_score[idx+1] = min(((scores_overall[idx+1] + percentile_score[idx+1] // 2) +1),10)
