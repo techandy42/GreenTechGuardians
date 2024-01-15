@@ -93,7 +93,7 @@ def extract_data_from_csv_file(df, jsonl_file_name, st=None):
 
 if __name__ == "__main__":
   df = pd.read_csv('ValidationSet_AI_Earthhack - ValidationSet.csv', encoding='latin-1')
-  df = df.iloc[100:]
+  df = df.iloc[:5]
   added_items = extract_data_from_csv_file(df, "./outputs/extracted_data_validation_dataset.jsonl")
   print("Added Items:")
   for item in added_items:

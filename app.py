@@ -298,6 +298,26 @@ elif st.session_state.view_state == 'chat':
             
         st.session_state.conversation.ask_question(user_question)
 
-    # Display the conversation history
-    for dialog in st.session_state.conversation.chat_history:
-        st.write(dialog['content'])
+    custom_style = """
+    <style>
+    .chatbox_chatbot {
+        background-color: #4CAF50;  /* Green background */
+        color: white;
+        padding: 10px;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+
+    .chatbox_user {
+        background-color: #2196F3;  /* Blue background */
+        color: white;
+        padding: 10px;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+    </style>
+    """
+
+    st.markdown(custom_style, unsafe_allow_html=True)
+    chat_history_string = ''.join([f'<div class="{"chatbox_chatbot" if dialog["role"] == "assistant" else "chatbox_user"}">{dialog["content"]}</div>' for dialog in st.session_state.conversation.chat_history])
+    st.markdown(f"{chat_history_string}", unsafe_allow_html=True)
