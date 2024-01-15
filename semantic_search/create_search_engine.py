@@ -10,7 +10,7 @@ client = OpenAI(
   api_key=os.environ['OPENAI_API_KEY']
 )
 
-df = pd.read_json('../outputs/combined_data_first_200_rows.jsonl', lines=True)
+df = pd.read_json('../outputs/extracted_data_training_dataset.jsonl', lines=True)
 
 df['combined_text'] = df.apply(lambda x: f"{x['product']} {x['summary']} {' '.join(x['categories'])}", axis=1)
 
