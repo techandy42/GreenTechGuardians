@@ -30,100 +30,22 @@ def ind_score_overall(df, business_id, processing_rating = None, access_rating =
     var = embedded_values[business_id-1]
     if embedded_value_rating:
         var = embedded_value_rating
-    if var <= 0.3:
-        score_tracker["embedded score"] = 1
-    elif var <= 0.6:
-        score_tracker["embedded score"] = 2
-    elif var <= 0.9:
-        score_tracker["embedded score"] = 3
-    elif var <= 1.2:
-        score_tracker["embedded score"] = 4
-    elif var <= 1.5:
-        score_tracker["embedded score"] = 5
-    elif var <= 1.8:
-        score_tracker["embedded score"] = 6
-    elif var <= 2.1:
-        score_tracker["embedded score"] = 7
-    elif var <= 2.4:
-        score_tracker["embedded score"] = 8
-    elif var <= 2.7:
-        score_tracker["embedded score"] = 9
-    elif var <= 3.0:
-        score_tracker["embedded score"] = 10
+    score_tracker["embedded score"] = var * 10
 
     var = access_levels[business_id-1]
     if access_rating:
         var = access_rating
         print("entered var is: ")
         print(var)
-    if var <= 0.3:
-        score_tracker["access score"] = 10
-    elif var <= 0.6:
-        score_tracker["access score"] = 9
-    elif var <= 0.9:
-        score_tracker["access score"] = 8
-    elif var <= 1.2:
-        score_tracker["access score"] = 7
-    elif var <= 1.5:
-        score_tracker["access score"] = 6
-    elif var <= 1.8:
-        score_tracker["access score"] = 5
-    elif var <= 2.1:
-        score_tracker["access score"] = 4
-    elif var <= 2.4:
-        score_tracker["access score"] = 3
-    elif var <= 2.7:
-        score_tracker["access score"] = 2
-    elif var <= 3.0:
-        score_tracker["access score"] = 1
+    score_tracker["access score"] = 10 - (var * 10) + 1
 
     var = processing_levels[business_id-1]
     if processing_rating:
         var = processing_rating
-    if var <= 0.3:
-        score_tracker["processing score"] = 10
-    elif var <= 0.6:
-        score_tracker["processing score"] = 9
-    elif var <= 0.9:
-        score_tracker["processing score"] = 8
-    elif var <= 1.2:
-        score_tracker["processing score"] = 7
-    elif var <= 1.5:
-        score_tracker["processing score"] = 6
-    elif var <= 1.8:
-        score_tracker["processing score"] = 5
-    elif var <= 2.1:
-        score_tracker["processing score"] = 4
-    elif var <= 2.4:
-        score_tracker["processing score"] = 3
-    elif var <= 2.7:
-        score_tracker["processing score"] = 2
-    elif var <= 3.0:
-        score_tracker["processing score"] = 1
+    score_tracker["processing score"] = 10 - (var * 10) + 1
 
     score_tracker["average score"] = (score_tracker["embedded score"] + score_tracker["access score"] + score_tracker["processing score"]) / 3.0
-
-    var = score_tracker["average score"]
-    if var <= 0.3:
-        score_tracker["overall score"] = 1
-    elif var <= 0.6:
-        score_tracker["overall score"] = 2
-    elif var <= 0.9:
-        score_tracker["overall score"] = 3
-    elif var <= 1.2:
-        score_tracker["overall score"] = 4
-    elif var <= 1.5:
-        score_tracker["overall score"] = 5
-    elif var <= 1.8:
-        score_tracker["overall score"] = 6
-    elif var <= 2.1:
-        score_tracker["overall score"] = 7
-    elif var <= 2.4:
-        score_tracker["overall score"] = 8
-    elif var <= 2.7:
-        score_tracker["overall score"] = 9
-    else:
-        score_tracker["overall score"] = 10
+    score_tracker["overall score"] = score_tracker["average score"]
 
     dict = get_percentiles_for_business(business_id, df, cluster_assignment, clustering_model, index)
     score_tracker["percentile score"] = min((dict["business_embedded_percentile"] // 10) + 1, 10)
@@ -145,49 +67,51 @@ def scorer(data, df, regular):
     if regular:
         for idx in range(len(ids)):
             var = data[idx]
-            if var <= 0.3:
-                score_tracker[idx+1] = 1
-            elif var <= 0.6:
-                score_tracker[idx+1] = 2
-            elif var <= 0.9:
-                score_tracker[idx+1] = 3
-            elif var <= 1.2:
-                score_tracker[idx+1] = 4
-            elif var <= 1.5:
-                score_tracker[idx+1] = 5
-            elif var <= 1.8:
-                score_tracker[idx+1] = 6
-            elif var <= 2.1:
-                score_tracker[idx+1] = 7
-            elif var <= 2.4:
-                score_tracker[idx+1] = 8
-            elif var <= 2.7:
-                score_tracker[idx+1] = 9
-            elif var <= 3.0:
-                score_tracker[idx+1] = 10
+            # if var <= 0.3:
+            #     score_tracker[idx+1] = 1
+            # elif var <= 0.6:
+            #     score_tracker[idx+1] = 2
+            # elif var <= 0.9:
+            #     score_tracker[idx+1] = 3
+            # elif var <= 1.2:
+            #     score_tracker[idx+1] = 4
+            # elif var <= 1.5:
+            #     score_tracker[idx+1] = 5
+            # elif var <= 1.8:
+            #     score_tracker[idx+1] = 6
+            # elif var <= 2.1:
+            #     score_tracker[idx+1] = 7
+            # elif var <= 2.4:
+            #     score_tracker[idx+1] = 8
+            # elif var <= 2.7:
+            #     score_tracker[idx+1] = 9
+            # elif var <= 3.0:
+            #     score_tracker[idx+1] = 10
+            score_tracker[idx+1] = var * 10
     else:
         for idx in range(len(ids)):
             var = data[idx]
-            if var <= 0.3:
-                score_tracker[idx+1] = 10
-            elif var <= 0.6:
-                score_tracker[idx+1] = 9
-            elif var <= 0.9:
-                score_tracker[idx+1] = 8
-            elif var <= 1.2:
-                score_tracker[idx+1] = 7
-            elif var <= 1.5:
-                score_tracker[idx+1] = 6
-            elif var <= 1.8:
-                score_tracker[idx+1] = 5
-            elif var <= 2.1:
-                score_tracker[idx+1] = 4
-            elif var <= 2.4:
-                score_tracker[idx+1] = 3
-            elif var <= 2.7:
-                score_tracker[idx+1] = 2
-            elif var <= 3.0:
-                score_tracker[idx+1] = 1
+            # if var <= 0.3:
+            #     score_tracker[idx+1] = 10
+            # elif var <= 0.6:
+            #     score_tracker[idx+1] = 9
+            # elif var <= 0.9:
+            #     score_tracker[idx+1] = 8
+            # elif var <= 1.2:
+            #     score_tracker[idx+1] = 7
+            # elif var <= 1.5:
+            #     score_tracker[idx+1] = 6
+            # elif var <= 1.8:
+            #     score_tracker[idx+1] = 5
+            # elif var <= 2.1:
+            #     score_tracker[idx+1] = 4
+            # elif var <= 2.4:
+            #     score_tracker[idx+1] = 3
+            # elif var <= 2.7:
+            #     score_tracker[idx+1] = 2
+            # elif var <= 3.0:
+            #     score_tracker[idx+1] = 1
+            score_tracker[idx+1] = 10 - (var * 10) + 1
     return score_tracker
 
 # scores based on each factor
@@ -218,26 +142,27 @@ def score_overall(avg_scores, df):
     scores_overall = {}
     for key in avg_scores:
         var = avg_scores[key]
-        if var <= 0.3:
-            scores_overall[key] = 1
-        elif var <= 0.6:
-            scores_overall[key] = 2
-        elif var <= 0.9:
-            scores_overall[key] = 3
-        elif var <= 1.2:
-            scores_overall[key] = 4
-        elif var <= 1.5:
-            scores_overall[key] = 5
-        elif var <= 1.8:
-            scores_overall[key] = 6
-        elif var <= 2.1:
-            scores_overall[key] = 7
-        elif var <= 2.4:
-            scores_overall[key] = 8
-        elif var <= 2.7:
-            scores_overall[key] = 9
-        else:
-            scores_overall[key] = 10
+        # if var <= 0.3:
+        #     scores_overall[key] = 1
+        # elif var <= 0.6:
+        #     scores_overall[key] = 2
+        # elif var <= 0.9:
+        #     scores_overall[key] = 3
+        # elif var <= 1.2:
+        #     scores_overall[key] = 4
+        # elif var <= 1.5:
+        #     scores_overall[key] = 5
+        # elif var <= 1.8:
+        #     scores_overall[key] = 6
+        # elif var <= 2.1:
+        #     scores_overall[key] = 7
+        # elif var <= 2.4:
+        #     scores_overall[key] = 8
+        # elif var <= 2.7:
+        #     scores_overall[key] = 9
+        # else:
+        #     scores_overall[key] = 10
+        scores_overall[key] = var * 10
     return scores_overall
 
 scores_overall = score_overall(avg_scores, df)
