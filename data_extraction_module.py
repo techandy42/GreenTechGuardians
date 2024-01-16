@@ -2,6 +2,7 @@ import pandas as pd
 from question_tree_module import ask_questions_in_tree
 import json
 import os
+import streamlit as st
 
 def get_last_index(jsonl_file_name):
   # Initialize a variable to store the last line
@@ -37,7 +38,7 @@ def check_and_create_file(file_path):
     else:
         print("File already exists.")
 
-def extract_data_from_csv_file(df, jsonl_file_name, st=None):
+def extract_data_from_csv_file(df, jsonl_file_name):
   check_and_create_file(jsonl_file_name)
 
   added_items = []
@@ -80,7 +81,7 @@ def extract_data_from_csv_file(df, jsonl_file_name, st=None):
         print(f"row {index} in dataframe: Error while processing item {current_index}... Moving to next item...")
         print("=" * 50)
         continue
-
+  print("hello")
   return added_items
 
 if __name__ == "__main__":

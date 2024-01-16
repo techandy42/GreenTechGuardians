@@ -74,6 +74,7 @@ if 'selected_prompt' not in st.session_state:
 
 if 'conversation' not in st.session_state:
     st.session_state.conversation = None
+
 if 'user_uploaded' not in st.session_state:
     st.session_state.user_uploaded = False
 
@@ -160,10 +161,12 @@ custom_style = """
 if st.session_state.view_state == 'search':
 
     st.session_state.uploaded_file = st.file_uploader("Upload my own CSV dataset to search from")
+    print(st.session_state.uploaded_file)
+    print(st.session_state.user_uploaded)
     if st.session_state.uploaded_file is not None and st.session_state.user_uploaded == False:
         try:
             uploaded_df = pd.read_csv(st.session_state.uploaded_file, encoding="latin-1")
-            items = extract_data_from_csv_file(uploaded_df, "user_uploaded_extraction.jsonl", st=st)
+            items = extract_data_from_csv_file(uploaded_df, "user_uploaded_extraction.jsonl")
             print(items)
             st.session_state.uploaded_df = pd.DataFrame(items)
             print(st.session_state.uploaded_df)
