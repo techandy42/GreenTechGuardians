@@ -7,7 +7,7 @@ from clustering_test import clustering_model
 from dotenv import load_dotenv
 import pinecone
 import os
-from solution_rating import percentile_score, strategy_score
+from solution_rating import percentile_score, strategy_score, ind_score_overall
 
 load_dotenv()
 pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-gcp-free')
@@ -35,6 +35,8 @@ if 'embedded_value_percentile' not in st.session_state:
 
 if 'edited' not in st.session_state:
      st.session_state.edited = {}
+if 'overall_score' not in st.session_state:
+     st.session_state.overall_score = None
 
 
 df = pd.read_json('outputs/extracted_data_training_dataset.jsonl', lines=True)
@@ -65,7 +67,10 @@ def report(id):
      st.write(business['summary'])
      with st.expander("More Detailed Description"):
           st.write(business['solution'])
-     st.subheader(f"Overall Solution Score: {strategy_score[id+1]}/10")
+     if not st.session_state.overall_score:
+          st.session_state.overall_score = strategy_score[id+1]
+     overall_score_placeholder = st.empty()
+     overall_score_placeholder.subheader(f"Overall Solution Score: {st.session_state.overall_score}/10")
      # columns = st.columns(3)
      percentiles = get_percentiles_for_business(id, df, cluster_assignment, clustering_model, index)
 
@@ -111,6 +116,10 @@ def report(id):
                     processing_percentile_placeholder.empty()
                     st.session_state.processing_percentile = round(get_modified_percentile(id, df, cluster_assignment, clustering_model, index, st.session_state.processing_rating, "processing_level"),2)
                     processing_percentile_placeholder.write(f"This business is at the {st.session_state.processing_percentile}th percentile of similar businesses")
+                    st.session_state.overall_score = ind_score_overall(df, id, processing_rating=st.session_state.processing_rating)['overall with strategy']
+                    print(st.session_state.overall_score)
+                    overall_score_placeholder.subheader(f"Overall Solution Score: {st.session_state.overall_score}/10")
+
 
      ### ACCESS LEVEL SECTION ###
                     
@@ -136,9 +145,7 @@ def report(id):
           with st.form("Edit Access Level"):
                st.write("Please enter your desired content. Leave an item blank if you'd like to keep the original content.")
                access_input = st.number_input("Enter new rating", placeholder="Enter")
-               if access_input == "":
-                   pass
-               elif processing_input <= 1 and processing_input >= 0:
+               if processing_input <= 1 and processing_input >= 0:
                     st.session_state.access_rating = access_input
                     add_to_edited(id, 'access_level', access_input)
                else:
@@ -155,6 +162,8 @@ def report(id):
                     access_percentile_placeholder.empty()
                     st.session_state.access_percentile = round(get_modified_percentile(id, df, cluster_assignment, clustering_model, index, st.session_state.access_rating, "access_level"),2)
                     access_percentile_placeholder.write(f"This business is at the {st.session_state.access_percentile}th percentile of similar businesses")
+                    st.session_state.overall_score = ind_score_overall(df, id, access_rating=st.session_state.access_rating)['overall with strategy']
+
 
      ### EMBEDDED VALUE SECTION ###
 
@@ -181,6 +190,7 @@ def report(id):
                embedded_value_input = st.number_input("Enter new rating", placeholder="Enter")
                if embedded_value_input <= 1 and embedded_value_input >=0:
                     st.session_state.embedded_value_rating = embedded_value_input
+                    add_to_edited(id, 'embedded_value', embedded_value_input)
                else:
                     st.write("Sorry! The input must be between 0 and 1")
                embedded_value_reasoning_input = st.text_input("Enter new reasoning", placeholder = "Enter")
@@ -196,6 +206,8 @@ def report(id):
                     embedded_value_percentile_placeholder.empty()
                     st.session_state.embedded_value_percentile = round(get_modified_percentile(id, df, cluster_assignment, clustering_model, index, st.session_state.embedded_value_rating, "embedded_value"),2)
                     embedded_value_percentile_placeholder.write(f"This business is at the {st.session_state.embedded_value_percentile}th percentile of similar businesses")
+                    st.session_state.overall_score = ind_score_overall(df, id, embedded_value_rating=st.session_state.embedded_value_rating)['overall with strategy']
+
 
      ### BUSINESS STRATEGY SECTION ###
                     

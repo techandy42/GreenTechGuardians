@@ -20,7 +20,7 @@ processing_levels = list(df['processing_level'])
 # functions to get scores for individual businesses
 # embedded (regular), access (opposite), processing (opposite), average, overall, percentile
 # gets all scores for an individual business
-def ind_score_overall(df, business_id):
+def ind_score_overall(df, business_id, processing_rating = None, access_rating = None, embedded_value_rating = None):
     ids = list(df['id'])
     embedded_values = list(df['embedded_value'])
     access_levels = list(df['access_level'])
@@ -28,6 +28,8 @@ def ind_score_overall(df, business_id):
     categories = list(df['categories'])
     score_tracker = {}
     var = embedded_values[business_id-1]
+    if embedded_value_rating:
+        var = embedded_value_rating
     if var <= 0.3:
         score_tracker["embedded score"] = 1
     elif var <= 0.6:
@@ -50,6 +52,10 @@ def ind_score_overall(df, business_id):
         score_tracker["embedded score"] = 10
 
     var = access_levels[business_id-1]
+    if access_rating:
+        var = access_rating
+        print("entered var is: ")
+        print(var)
     if var <= 0.3:
         score_tracker["access score"] = 10
     elif var <= 0.6:
@@ -72,6 +78,8 @@ def ind_score_overall(df, business_id):
         score_tracker["access score"] = 1
 
     var = processing_levels[business_id-1]
+    if processing_rating:
+        var = processing_rating
     if var <= 0.3:
         score_tracker["processing score"] = 10
     elif var <= 0.6:
@@ -271,3 +279,6 @@ def strategy_scoring(df, scores_overall, percentile_score):
     return strategy_score
 
 strategy_score = strategy_scoring(df, scores_overall, percentile_score)
+print(ind_score_overall(df, 1, processing_rating=0.9))
+print(ind_score_overall(df, 1, processing_rating=0.1))
+print(ind_score_overall(df, 1, access_rating=0.1))
