@@ -7,7 +7,7 @@ from clustering_test import clustering_model
 from dotenv import load_dotenv
 import pinecone
 import os
-from solution_rating import percentile_score
+from solution_rating import percentile_score, strategy_score
 
 load_dotenv()
 pinecone.init(api_key=os.environ.get("PINECONE_API_KEY"), environment='us-west4-gcp-free')
@@ -33,6 +33,8 @@ if 'access_percentile' not in st.session_state:
 if 'embedded_value_percentile' not in st.session_state:
     st.session_state.embedded_value_percentile = None
 
+if 'edited' not in st.session_state:
+     st.session_state.edited = {}
 
 
 df = pd.read_json('outputs/extracted_data_training_dataset.jsonl', lines=True)
@@ -46,6 +48,13 @@ strat_full_names = {"RPO": "RPO (Retain Product Ownership)",
                     "PLE": "PLE (Product Life Extension)",
                     "PARTNERSHIP": "PARTNERSHIP"}
 
+def add_to_edited(id, content_type, content):
+     if id not in st.session_state.edited.keys():
+          st.session_state.edited[id] = {}
+     st.session_state.edited[id][content_type] = content
+     print(st.session_state.edited)
+
+
 
 def report(id):
      business = df[df['id']==id].iloc[0]
@@ -56,7 +65,7 @@ def report(id):
      st.write(business['summary'])
      with st.expander("More Detailed Description"):
           st.write(business['solution'])
-     st.subheader(f"Overall Solution Score: {percentile_score[id+1]}/10")
+     st.subheader(f"Overall Solution Score: {strategy_score[id+1]}/10")
      # columns = st.columns(3)
      percentiles = get_percentiles_for_business(id, df, cluster_assignment, clustering_model, index)
 
@@ -84,8 +93,15 @@ def report(id):
      with st.expander("I would like to modify this section"):
           with st.form("Edit Processing Level"):
                st.write("Please enter your desired content. Leave an item blank if you'd like to keep the original content.")
-               st.session_state.processing_rating = st.number_input("Enter new rating", placeholder="Enter")
-               st.session_state.processing_reasoning = st.text_input("Enter new reasoning", placeholder = "Enter")
+               processing_input = st.number_input("Enter new rating", placeholder="Enter")
+               if processing_input <= 1 and processing_input >= 0:
+                    st.session_state.processing_rating = processing_input
+                    add_to_edited(id, 'processing_level', processing_input)
+               else:
+                    st.write("Sorry! The input must be between 0 and 1")
+               processing_reasoning_input = st.text_input("Enter new reasoning", placeholder = "Enter")
+               if processing_reasoning_input != "":
+                    st.session_state.processing_reasoning = processing_reasoning_input
                submitted = st.form_submit_button("Submit")
                if submitted:
                     processing_rating_placeholder.empty()
@@ -119,8 +135,17 @@ def report(id):
      with st.expander("I would like to modify this section"):
           with st.form("Edit Access Level"):
                st.write("Please enter your desired content. Leave an item blank if you'd like to keep the original content.")
-               st.session_state.access_rating = st.number_input("Enter new rating", placeholder="Enter")
-               st.session_state.access_reasoning = st.text_input("Enter new reasoning", placeholder = "Enter")
+               access_input = st.number_input("Enter new rating", placeholder="Enter")
+               if access_input == "":
+                   pass
+               elif processing_input <= 1 and processing_input >= 0:
+                    st.session_state.access_rating = access_input
+                    add_to_edited(id, 'access_level', access_input)
+               else:
+                    st.write("Sorry! The input must be between 0 and 1")
+               access_reasoning_input = st.text_input("Enter new reasoning", placeholder = "Enter")
+               if access_reasoning_input != "":
+                    st.session_state.access_reasoning = access_reasoning_input
                submitted = st.form_submit_button("Submit")
                if submitted:
                     access_rating_placeholder.empty()
@@ -153,8 +178,14 @@ def report(id):
      with st.expander("I would like to modify this section"):
           with st.form("Edit Embedded Value"):
                st.write("Please enter your desired content. Leave an item blank if you'd like to keep the original content.")
-               st.session_state.embedded_value_rating = st.number_input("Enter new rating", placeholder="Enter")
-               st.session_state.embedded_value_reasoning = st.text_input("Enter new reasoning", placeholder = "Enter")
+               embedded_value_input = st.number_input("Enter new rating", placeholder="Enter")
+               if embedded_value_input <= 1 and embedded_value_input >=0:
+                    st.session_state.embedded_value_rating = embedded_value_input
+               else:
+                    st.write("Sorry! The input must be between 0 and 1")
+               embedded_value_reasoning_input = st.text_input("Enter new reasoning", placeholder = "Enter")
+               if embedded_value_reasoning_input != "":
+                    st.session_state.embedded_value_reasoning = embedded_value_reasoning_input
                # Every form must have a submit button.
                submitted = st.form_submit_button("Submit")
                if submitted:
