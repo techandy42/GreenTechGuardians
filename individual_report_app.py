@@ -59,6 +59,30 @@ def add_to_edited(id, content_type, content):
 
 
 def report(id):
+     if 'processing_rating' not in st.session_state:
+          st.session_state.processing_rating = None
+     if 'access_rating' not in st.session_state:
+          st.session_state.access_rating = None
+     if 'embedded_value_rating' not in st.session_state:
+          st.session_state.embedded_value_rating = None
+     if 'processing_reasoning' not in st.session_state:
+          st.session_state.processing_reasoning = None
+     if 'access_reasoning' not in st.session_state:
+          st.session_state.access_reasoning= None
+     if 'embedded_value_reasoning' not in st.session_state:
+          st.session_state.embedded_value_reasoning = None
+     if 'processing_percentile' not in st.session_state:
+          st.session_state.processing_percentile = None
+     if 'access_percentile' not in st.session_state:
+          st.session_state.access_percentile = None
+     if 'embedded_value_percentile' not in st.session_state:
+          st.session_state.embedded_value_percentile = None
+
+     if 'edited' not in st.session_state:
+          st.session_state.edited = {}
+     if 'overall_score' not in st.session_state:
+          st.session_state.overall_score = None
+
      business = df[df['id']==id].iloc[0]
      st.title(business['product'])
      st.header("Problem Statement")
