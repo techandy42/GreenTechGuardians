@@ -53,9 +53,9 @@ def ind_score_overall(df, business_id, processing_rating = None, access_rating =
     recommended = get_suggestion(processing_levels[business_id-1], access_levels[business_id-1], embedded_values[business_id-1])
     category = categories[business_id-1]
     if recommended == category:
-        score_tracker["overall with strategy"] = min(((score_tracker["overall score"] + score_tracker["percentile score"] // 2) +1), 10)
+        score_tracker["overall with strategy"] = min(((score_tracker["overall score"] + score_tracker["percentile score"]) // 2 + 1), 10)
     else:
-        score_tracker["overall with strategy"] = min((score_tracker["overall score"] + score_tracker["percentile score"] // 2), 10)
+        score_tracker["overall with strategy"] = min((score_tracker["overall score"] + score_tracker["percentile score"]) // 2, 10)
     
     return score_tracker
 
@@ -162,7 +162,8 @@ def score_overall(avg_scores, df):
         #     scores_overall[key] = 9
         # else:
         #     scores_overall[key] = 10
-        scores_overall[key] = var * 10
+        scores_overall[key] = var * 8
+
     return scores_overall
 
 scores_overall = score_overall(avg_scores, df)
@@ -207,3 +208,4 @@ strategy_score = strategy_scoring(df, scores_overall, percentile_score)
 print(ind_score_overall(df, 1, processing_rating=0.9))
 print(ind_score_overall(df, 1, processing_rating=0.1))
 print(ind_score_overall(df, 1, access_rating=0.1))
+print(ind_score_overall(df, 1, processing_rating=0.1, access_rating=0.3, embedded_value_rating=0.7))
